@@ -1,0 +1,893 @@
+﻿@model List<EducaEFRT.Models.DB.Repositories.AsignacionCursoViewModel>
+@{
+    Layout = null;
+    ViewBag.Title = "Panel Docente";
+    var nombreUsuario = ViewBag.NombreUsuario as string;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - EduControl</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --dark-color: #0d3b66;
+            --light-color: #f8f9fa;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --transition-base: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .body-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header Styles */
+        .app-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .app-title {
+            font-weight: 700;
+            color: var(--dark-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .welcome-message {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .welcome-message span {
+            font-weight: 600;
+            color: var(--primary-color);
+            text-transform: uppercase;
+        }
+
+        /* User Toolbar */
+        .user-toolbar {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition-base);
+        }
+
+        .user-toolbar.hidden {
+            transform: translateY(-100px);
+        }
+
+        /* Course Cards */
+        .cursos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .curso-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: var(--transition-base);
+            border: none;
+            position: relative;
+        }
+
+        .curso-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .curso-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .curso-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .curso-card-content {
+            padding: 1.5rem;
+        }
+
+        .curso-card h4 {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--dark-color);
+            font-size: 1.25rem;
+        }
+
+        .curso-card p {
+            margin: 0.5rem 0;
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .curso-card p strong {
+            color: var(--dark-color);
+        }
+
+        .curso-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        /* Buttons */
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: var(--transition-base);
+            text-align: center;
+        }
+
+        .btn-action i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-action:hover i {
+            transform: translateX(3px);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline-info {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-outline-info:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* Alert Messages */
+        .alert-message {
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        /* Modal Enhancements */
+        .modal-content {
+            border-radius: 12px;
+            overflow: hidden;
+            border: none;
+        }
+
+        .modal-header {
+            background-color: var(--primary-light);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .modal-title {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        #clock {
+            font-family: 'Courier New', monospace;
+            color: var(--primary-color);
+        }
+
+        /* Animations */
+        .animate-delay-1 { animation-delay: 0.1s; }
+        .animate-delay-2 { animation-delay: 0.2s; }
+        .animate-delay-3 { animation-delay: 0.3s; }
+
+        /* Responsive Adjustments */
+        @@media (max-width: 768px) {
+            .body-content {
+                padding: 1.5rem;
+            }
+
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .welcome-message {
+                font-size: 1.25rem;
+            }
+
+            .cursos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-toolbar {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- User Toolbar -->
+    <div id="userToolbar" class="user-toolbar animate__animated animate__fadeInDown">
+        <i class="bi bi-person-circle fs-4" style="color: var(--primary-color);"></i>
+        <form action="@Url.Action("Logout", "Account")" method="post" id="logoutForm">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+                Cerrar sesión
+            </button>
+        </form>
+    </div>
+
+    <div class="body-content">
+        <!-- App Header -->
+        <header class="app-header animate__animated animate__fadeIn">
+            <h1 class="app-title">
+                <i class="bi bi-journal-bookmark-fill me-2"></i>SISTEMA EduControl
+            </h1>
+        </header>
+
+        <!-- Welcome Message -->
+        <div class="welcome-message animate__animated animate__fadeIn animate-delay-1">
+            Bienvenido, profesor <span>@nombreUsuario</span>
+        </div>
+
+        <!-- Alert Messages -->
+        @if (TempData["MensajeAsistencia"] != null)
+        {
+            <div class="alert-message alert alert-info animate__animated animate__fadeIn animate-delay-2">
+                @TempData["MensajeAsistencia"]
+            </div>
+        }
+
+        <!-- Courses Section -->
+        <div class="animate__animated animate__fadeIn animate-delay-2">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-warning">
+                    No se encontraron cursos asignados para este docente.
+                </div>
+            }
+            else
+            {
+                <div class="cursos-grid">
+                    @foreach (var curso in Model)
+                    {
+                        <div class="curso-card animate__animated animate__fadeInUp" style="animation-delay: @(Model.IndexOf(curso) * 0.1 + 0.3)s">
+                            <img src="@curso.ImagenUrl" alt="Imagen del curso @curso.NombreCurso" class="img-fluid" />
+                            <div class="curso-card-content">
+                                <h4>@curso.NombreCurso</h4>
+                                <p>Sección: <b>@curso.NombreSeccion</b></p>
+                                <p>Turno: <b>@curso.NombreTurno</b></p>
+                                <div class="curso-links">
+                                    <button type="button" class="btn-action btn btn-outline-primary"
+                                            data-bs-toggle="modal" data-bs-target="#modalAsistencia"
+                                            data-id="@curso.IdAsignacion" data-curso="@curso.NombreCurso"
+                                            data-seccion="@curso.NombreSeccion" data-turno="@curso.NombreTurno">
+                                        <i class="bi bi-check-circle-fill me-1"></i> REGISTRAR MI ASISTENCIA
+                                    </button>
+                                    <button type="button" class="btn-action btn btn-outline-info"
+                                            data-bs-toggle="modal" data-bs-target="#modalListaEstudiantes"
+                                            data-id="@curso.IdAsignacion" data-curso="@curso.NombreCurso"
+                                            data-seccion="@curso.NombreSeccion" data-turno="@curso.NombreTurno">
+                                        <i class="bi bi-people-fill me-1"></i> LISTA ESTUDIANTES
+                                    </button>
+                                    <button type="button" class="btn-action btn btn-outline-secondary"
+                                            data-bs-toggle="modal" data-bs-target="#modalNotasEstudiantes"
+                                            data-id="@curso.IdAsignacion" data-curso="@curso.NombreCurso"
+                                            data-seccion="@curso.NombreSeccion" data-turno="@curso.NombreTurno">
+                                        <i class="bi bi-pencil-square me-1"></i> REGISTRAR NOTAS
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="animate__animated animate__fadeIn animate-delay-3">
+        <p class="mb-0">&copy; @DateTime.Now.Year - Sistema EduControl</p>
+    </footer>
+
+    <!-- Attendance Modal -->
+    <div class="modal fade" id="modalAsistencia" tabindex="-1" aria-labelledby="modalAsistenciaLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="formAsistencia" method="post" action="@Url.Action("RegistrarAsistencia", "Docente")">
+                    <div class="modal-header">
+                        <h5 class="modal-title w-100 text-center fw-bold fs-4" id="modalAsistenciaLabel">
+                            <i class="bi bi-check-circle-fill me-2"></i>MI ASISTENCIA
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body d-flex justify-content-between align-items-start">
+                        <div style="flex: 1;">
+                            <input type="hidden" id="IdAsignacion" name="IdAsignacion" />
+                            <div class="mb-2"><strong>Curso:</strong> <span id="Curso" class="text-primary"></span></div>
+                            <div class="mb-2"><strong>Sección:</strong> <span id="Seccion" class="text-primary"></span></div>
+                            <div><strong>Turno:</strong> <span id="Turno" class="text-primary"></span></div>
+                        </div>
+                        <div style="min-width: 150px; display: flex; justify-content: center; align-items: center;">
+                            <div id="clock" class="fs-3 fw-bold"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-save-fill me-1"></i> Guardar
+                        </button>
+                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle-fill me-1"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student List Modal -->
+    <div class="modal fade" id="modalListaEstudiantes" tabindex="-1" aria-labelledby="modalListaEstudiantesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <form id="formListaAsistencia" method="post" action="@Url.Action("RegistrarAsistenciaEstudiantes", "Docente")">
+                    <div class="modal-header">
+                        <h5 class="modal-title w-100 text-center fw-bold fs-4">Asistencia de estudiantes</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="IdAsignacionEst" name="IdAsignacionEst" />
+                        <div class="row align-items-center mb-3">
+                            <div class="col-md-3"><strong>Curso:</strong> <span id="CursoEst"></span></div>
+                            <div class="col-md-3"><strong>Sección:</strong> <span id="SeccionEst"></span></div>
+                            <div class="col-md-3"><strong>Turno:</strong> <span id="TurnoEst"></span></div>
+                            <div class="col-md-3 text-end">
+                                <button type="button" class="btn btn-outline-success px-4 py-2 fs-5 w-100" id="btnConsultarLista">Consultar Lista</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 row align-items-center">
+                            <label class="col-sm-2 col-form-label">Código estudiante:</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="codigoEstudiante" />
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-primary w-100" id="btnBuscarCodigo">Buscar</button>
+                            </div>
+                        </div>
+                        <div id="contenedorTablaEstudiantes" class="table-responsive" style="display:none;">
+                            <table class="table table-bordered table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Cód. Estudiante</th>
+                                        <th>Apellidos</th>
+                                        <th>Nombres</th>
+                                        <th>Asistió</th>
+                                        <th>Tardanza</th>
+                                        <th>Faltó</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaEstudiantesBody">
+                                    <!-- Registros se llenarán dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Guardar asistencia</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grades Modal -->
+    <div class="modal fade" id="modalNotasEstudiantes" tabindex="-1" aria-labelledby="modalNotasEstudiantesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <form id="formNotasEstudiantes" method="post" action="@Url.Action("RegistrarNotasEstudiantes", "Docente")">
+                    <div class="modal-header">
+                        <h5 class="modal-title w-100 text-center fw-bold fs-4">Notas de estudiantes</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="IdAsignacionN" name="IdAsignacionN" />
+                        <div class="row align-items-center mb-3">
+                            <div class="col-md-3"><strong>Curso:</strong> <span id="CursoN"></span></div>
+                            <div class="col-md-3"><strong>Sección:</strong> <span id="SeccionN"></span></div>
+                            <div class="col-md-3"><strong>Turno:</strong> <span id="TurnoN"></span></div>
+                            <div class="col-md-3 text-end">
+                                <button type="button" class="btn btn-outline-success px-4 py-2 fs-5 w-100" id="btnConsultarNotas">Consultar Lista</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 row align-items-center">
+                            <label class="col-sm-2 col-form-label">Código estudiante:</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="codigoEstudianteNotas" />
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-primary w-100" id="btnBuscarCodigoNotas">Buscar</button>
+                            </div>
+                        </div>
+
+                        <div id="contenedorTablaNotas" class="table-responsive" style="display:none;">
+                            <table class="table table-bordered table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th style="width:110px;">Cód. Estudiante</th>
+                                        <th style="width:120px;">Apellidos</th>
+                                        <th style="width:120px;">Nombres</th>
+                                        <th style="width:60px;">T1 (25%)</th>
+                                        <th style="width:60px;">T2 (25%)</th>
+                                        <th style="width:60px;">EF (50%)</th>
+                                        <th style="width:50px;">Promedio</th>
+                                        <th style="width:105px;">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaNotasBody">
+                                    <!-- Registros se llenarán dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Guardar notas</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // User toolbar scroll behavior
+        const userToolbar = document.getElementById("userToolbar");
+        let lastScrollPosition = 0;
+
+        window.addEventListener("scroll", function () {
+            const currentScrollPosition = window.pageYOffset;
+
+            if (currentScrollPosition <= 0) {
+                userToolbar.classList.remove("hidden");
+                return;
+            }
+
+            if (currentScrollPosition > lastScrollPosition && !userToolbar.classList.contains("hidden")) {
+                // Scrolling down
+                userToolbar.classList.add("hidden");
+            } else if (currentScrollPosition < lastScrollPosition && userToolbar.classList.contains("hidden")) {
+                // Scrolling up
+                userToolbar.classList.remove("hidden");
+            }
+
+            lastScrollPosition = currentScrollPosition;
+        });
+
+        // Attendance modal setup
+        const modalAsistencia = document.getElementById('modalAsistencia');
+        modalAsistencia.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const idAsignacion = button.getAttribute('data-id');
+            const curso = button.getAttribute('data-curso');
+            const seccion = button.getAttribute('data-seccion');
+            const turno = button.getAttribute('data-turno');
+
+            modalAsistencia.querySelector('#IdAsignacion').value = idAsignacion;
+            modalAsistencia.querySelector('#Curso').textContent = curso;
+            modalAsistencia.querySelector('#Seccion').textContent = seccion;
+            modalAsistencia.querySelector('#Turno').textContent = turno;
+
+            function updateClock() {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+
+            updateClock();
+            const clockInterval = setInterval(updateClock, 1000);
+
+            modalAsistencia.addEventListener('hidden.bs.modal', function () {
+                clearInterval(clockInterval);
+            });
+        });
+
+        // Preload images for smoother hover effects
+        document.addEventListener('DOMContentLoaded', function () {
+            const images = document.querySelectorAll('.curso-card img');
+            images.forEach(img => {
+                const image = new Image();
+                image.src = img.src;
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const modal = document.getElementById('modalAsistencia');
+        modal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            const idAsignacion = button.getAttribute('data-id');
+            const curso = button.getAttribute('data-curso');
+            const seccion = button.getAttribute('data-seccion');
+            const turno = button.getAttribute('data-turno');
+
+            modal.querySelector('#IdAsignacion').value = idAsignacion;
+            modal.querySelector('#Curso').textContent = curso;
+            modal.querySelector('#Seccion').textContent = seccion;
+            modal.querySelector('#Turno').textContent = turno;
+        });
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+    <script>
+        const topBar = document.getElementById("topBar");
+
+        window.addEventListener("scroll", function () {
+            if (window.scrollY === 0) {
+                // Mostrar solo si estamos completamente arriba
+                topBar.style.top = "10px";
+            } else {
+                // Ocultar en cualquier otra posición
+                topBar.style.top = "-60px";
+            }
+        });
+    </script>
+    <script>
+        const modalLista = document.getElementById('modalListaEstudiantes');
+        modalLista.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            const idAsignacion = button.getAttribute('data-id');
+            const curso = button.getAttribute('data-curso');
+            const seccion = button.getAttribute('data-seccion');
+            const turno = button.getAttribute('data-turno');
+
+            modalLista.querySelector('#IdAsignacionEst').value = idAsignacion;
+            modalLista.querySelector('#CursoEst').textContent = curso;
+            modalLista.querySelector('#SeccionEst').textContent = seccion;
+            modalLista.querySelector('#TurnoEst').textContent = turno;
+
+            // Limpia contenido anterior
+            document.getElementById('tablaEstudiantesBody').innerHTML = '';
+            document.getElementById('contenedorTablaEstudiantes').style.display = 'none';
+        });
+    </script>
+    <!-- MODAL REGISTRAR NOTAS -->
+    <script>
+        const modalNotas = document.getElementById('modalNotasEstudiantes');
+        modalNotas.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            const idAsignacion = button.getAttribute('data-id');
+            const curso = button.getAttribute('data-curso');
+            const seccion = button.getAttribute('data-seccion');
+            const turno = button.getAttribute('data-turno');
+
+            modalNotas.querySelector('#IdAsignacionN').value = idAsignacion;
+            modalNotas.querySelector('#CursoN').textContent = curso;
+            modalNotas.querySelector('#SeccionN').textContent = seccion;
+            modalNotas.querySelector('#TurnoN').textContent = turno;
+
+            // Limpia contenido anterior
+            document.getElementById('tablaNotasBody').innerHTML = '';
+            document.getElementById('contenedorTablaNotas').style.display = 'none';
+        });
+    </script>
+
+    <script>
+        document.getElementById('btnConsultarLista').addEventListener('click', function () {
+            const idAsignacion = document.getElementById('IdAsignacionEst').value;
+
+            fetch(`/Docente/ObtenerEstudiantesPorAsignacion?idAsignacion=${idAsignacion}`)
+                .then(response => response.json())
+                .then(estudiantes => {
+                    const tbody = document.getElementById('tablaEstudiantesBody');
+                    tbody.innerHTML = '';
+
+                    estudiantes.forEach(est => {
+                        const estado = est.EstadoAsistencia || ""; // Puede ser "Asistio", "Tardanza", "Falto", o ""
+                        const checkedAsistio = estado === "Asistio" ? "checked" : "";
+                        const checkedTardanza = estado === "Tardanza" ? "checked" : "";
+                        const checkedFalto = estado === "Falto" ? "checked" : "";
+                        const required = estado ? "" : "required"; // Solo si aún no tiene asistencia
+
+                        const fila = `
+                                                                 <tr>
+                                                                     <td>${est.CodigoEstudiante}</td>
+                                                                     <td>${est.Apellidos}</td>
+                                                                     <td>${est.Nombres}</td>
+                                                                     <td><input type="radio" name="asistencia_${est.IdMatricula}" value="Asistio" ${checkedAsistio} ${required}></td>
+                                                                     <td><input type="radio" name="asistencia_${est.IdMatricula}" value="Tardanza" ${checkedTardanza}></td>
+                                                                     <td><input type="radio" name="asistencia_${est.IdMatricula}" value="Falto" ${checkedFalto}></td>
+                                                                     <input type="hidden" name="matriculas[]" value="${est.IdMatricula}">
+                                                                 </tr>`;
+                        tbody.insertAdjacentHTML('beforeend', fila);
+                    });
+
+                    document.getElementById('contenedorTablaEstudiantes').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error al obtener estudiantes:', error);
+                });
+        });
+
+        document.getElementById('btnBuscarCodigo').addEventListener('click', function () {
+            const idAsignacion = document.getElementById('IdAsignacionEst').value;
+            const codigo = document.getElementById('codigoEstudiante').value.trim();
+
+            if (!codigo) {
+                alert('Por favor ingrese un código de estudiante');
+                document.getElementById('codigoEstudiante').focus();
+                return;
+            }
+
+            fetch(`/Docente/BuscarEstudiantePorCodigo?idAsignacion=${idAsignacion}&codigo=${encodeURIComponent(codigo)}`)
+                .then(response => response.json())
+                .then(estudiantes => {
+                    const tbody = document.getElementById('tablaEstudiantesBody');
+                    tbody.innerHTML = '';
+
+                    if (estudiantes.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center">No se encontró estudiante con ese código.</td></tr>`;
+                        document.getElementById('contenedorTablaEstudiantes').style.display = 'block';
+                        document.getElementById('codigoEstudiante').focus();
+                        return;
+                    }
+
+                    estudiantes.forEach(est => {
+                        const estado = est.EstadoAsistencia || ""; // "Asistio", "Tardanza", "Falto", o ""
+                        const checkedAsistio = estado === "Asistio" ? "checked" : "";
+                        const checkedTardanza = estado === "Tardanza" ? "checked" : "";
+                        const checkedFalto = estado === "Falto" ? "checked" : "";
+                        const required = estado ? "" : "required";
+
+                        const fila = `
+                                                                 <tr>
+                                                                     <td>${est.CodigoEstudiante}</td>
+                                                                     <td>${est.Apellidos}</td>
+                                                                     <td>${est.Nombres}</td>
+                                                                     <td><input type="radio" name="asistencia_${est.IdMatricula}" value="Asistio" ${checkedAsistio} ${required}></td>
+                                                                     <td><input type="radio" name="asistencia_${est.IdMatricula}" value="Tardanza" ${checkedTardanza}></td>
+                                                                     <td><input type="radio" name="asistencia_${est.IdMatricula}" value="Falto" ${checkedFalto}></td>
+                                                                     <input type="hidden" name="matriculas[]" value="${est.IdMatricula}">
+                                                                 </tr>`;
+
+                        tbody.insertAdjacentHTML('beforeend', fila);
+                    });
+
+                    document.getElementById('contenedorTablaEstudiantes').style.display = 'block';
+                    document.getElementById('codigoEstudiante').value = '';
+
+                })
+                .catch(error => {
+                    console.error('Error al buscar estudiante:', error);
+                    alert('Error al buscar estudiante.');
+                });
+        });
+
+    </script>
+    <script>
+        document.getElementById('btnConsultarNotas').addEventListener('click', function () {
+            const idAsignacion = document.getElementById('IdAsignacionN').value;
+
+            fetch(`/Docente/ObtenerNotasPorAsignacion?idAsignacion=${idAsignacion}`)
+                .then(response => response.json())
+                .then(estudiantes => {
+                    const tbody = document.getElementById('tablaNotasBody');
+                    tbody.innerHTML = '';
+
+                    estudiantes.forEach(est => {
+                        // Asumo que recibes notas previas si hay, sino valores vacíos
+                        const t1 = est.NotaT1 ?? "";
+                        const t2 = est.NotaT2 ?? "";
+                        const ef = est.NotaEF ?? "";
+                        const promedio = est.Promedio ?? "";
+                        const estado = est.Estado ?? "";
+
+
+                        const fila = `
+                         <tr>
+                             <td>${est.CodigoEstudiante}</td>
+                             <td>${est.Apellidos}</td>
+                             <td>${est.Nombres}</td>
+                             <td><input type="number" min="0" max="20" step="0.5" name="notaT1_${est.IdMatricula}" value="${t1}" class="form-control"></td>
+                             <td><input type="number" min="0" max="20" step="0.5" name="notaT2_${est.IdMatricula}" value="${t2}" class="form-control"></td>
+                             <td><input type="number" min="0" max="20" step="0.5" name="notaEF_${est.IdMatricula}" value="${ef}" class="form-control"></td>
+                             <td><input type="text" value="${promedio}" class="form-control" readonly></td>
+                             <td><input type="text" value="${estado}" class="form-control" readonly></td>
+                             <input type="hidden" name="matriculas[]" value="${est.IdMatricula}">
+                         </tr>`;
+                        tbody.insertAdjacentHTML('beforeend', fila);
+                    });
+
+                    document.getElementById('contenedorTablaNotas').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error al obtener estudiantes:', error);
+                });
+        });
+
+        document.getElementById('btnBuscarCodigoNotas').addEventListener('click', function () {
+            const idAsignacion = document.getElementById('IdAsignacionN').value;
+            const codigo = document.getElementById('codigoEstudianteNotas').value.trim();
+
+            if (!codigo) {
+                alert('Por favor ingrese un código de estudiante');
+                document.getElementById('codigoEstudianteNotas').focus();
+                return;
+            }
+
+            fetch(`/Docente/BuscarEstudiantePorCodigoNotas?idAsignacion=${idAsignacion}&codigo=${encodeURIComponent(codigo)}`)
+                .then(response => response.json())
+                .then(estudiantes => {
+                    const tbody = document.getElementById('tablaNotasBody');
+                    tbody.innerHTML = '';
+
+                    if (estudiantes.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="8" class="text-center">No se encontró estudiante con ese código.</td></tr>`;
+                        document.getElementById('contenedorTablaNotas').style.display = 'block';
+                        document.getElementById('codigoEstudianteNotas').focus();
+                        return;
+                    }
+
+                    estudiantes.forEach(est => {
+                        const t1 = est.T1 ?? "";
+                        const t2 = est.T2 ?? "";
+                        const ef = est.EF ?? "";
+                        const promedio = est.Promedio ?? "";
+                        const estado = est.EstadoNota ?? "";
+
+                        const fila = `
+                         <tr>
+                             <td>${est.CodigoEstudiante}</td>
+                             <td>${est.Apellidos}</td>
+                             <td>${est.Nombres}</td>
+                             <td><input type="number" min="0" max="20" step="0.5" name="notaT1_${est.IdMatricula}" value="${t1}" class="form-control"></td>
+                             <td><input type="number" min="0" max="20" step="0.5" name="notaT2_${est.IdMatricula}" value="${t2}" class="form-control"></td>
+                             <td><input type="number" min="0" max="20" step="0.5" name="notaEF_${est.IdMatricula}" value="${ef}" class="form-control"></td>
+                             <td><input type="text" value="${promedio}" class="form-control" readonly></td>
+                             <td><input type="text" value="${estado}" class="form-control" readonly></td>
+                             <input type="hidden" name="matriculas[]" value="${est.IdMatricula}">
+                         </tr>`;
+                        tbody.insertAdjacentHTML('beforeend', fila);
+                    });
+
+                    document.getElementById('contenedorTablaNotas').style.display = 'block';
+                    document.getElementById('codigoEstudianteNotas').value = '';
+                })
+                .catch(error => {
+                    console.error('Error al buscar estudiante:', error);
+                    alert('Error al buscar estudiante.');
+                });
+        });
+
+    </script>
+
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @{
+        var mensaje = TempData["Mensaje"] as string;
+        var esExito = mensaje != null && mensaje.Contains("✅");
+        var icono = esExito ? "success" : "warning";
+        var titulo = esExito ? "¡Éxito!" : "Atención";
+        var mensajeLimpio = mensaje?
+            .Replace("✅", "")
+            .Replace("⚠️", "")
+            .Replace("\"", "\\\"")
+            .Trim();
+    }
+
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <script>
+        Swal.fire({
+            icon: '@icono',
+            title: '@titulo',
+            html: "@mensajeLimpio",
+            confirmButtonText: 'Aceptar'
+        });
+        </script>
+    }
+
+
+
+</body>
+</html>
