@@ -35,5 +35,34 @@ namespace EducaEFRT.Controllers
             }
             return View();
         }
+
+        // Gestión de Docentes
+        public ActionResult GestionDocente()
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Account");
+
+            using (var db = new EduControlDB())
+            {
+                var docentes = db.Docentes.ToList();
+                return View("~/Views/Admin/GestionDocente/Index.cshtml", docentes);
+            }
+        }
+
+        public ActionResult CrearDocente()
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Account");
+
+            return View("~/Views/Admin/GestionDocente/Crear.cshtml");
+        }
+
+        public ActionResult DetalleDocente(int id)
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Account");
+
+            return View("~/Views/Admin/GestionDocente/Detalle.cshtml");
+        }
     }
 }

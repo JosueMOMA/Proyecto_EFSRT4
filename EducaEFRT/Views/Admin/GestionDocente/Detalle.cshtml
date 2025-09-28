@@ -1,0 +1,176 @@
+@{
+    ViewData["Title"] = "Información de Docente";
+    // En un caso real, estos datos vendrían del @Model
+    var docente = new {
+        DNI = "12345678",
+        Nombres = "Juan Alberto",
+        Apellidos = "Perez Diaz",
+        Correo = "juan.perez@educontrol.com",
+        Celular = "+51 987 654 321",
+        Direccion = "Av. Siempre Viva 742",
+        Profesion = "Ingeniero de Sistemas",
+        GradoAcademico = "Magister en Educacion",
+        FotoUrl = "https://placehold.co/400x400/eef2ff/4361ee?text=JP"
+    };
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EduControl</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4361ee',
+                        'secondary': '#3f37c9',
+                        'accent': '#4895ef',
+                        'dark': '#0d3b66',
+                        'light': '#f8f9fa',
+                        'primary-light': '#eef2ff',
+                        'text-main': '#334155',
+                        'text-secondary': '#64748b'
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .bg-gradient-custom {
+            background: linear-gradient(135deg, #f6f8fc 0%, #e8effa 100%);
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gradient-custom text-text-main min-h-screen">
+    <div class="w-full max-w-5xl mx-auto p-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+            <div class="flex items-center gap-4">
+                 <a href="@Url.Action("GestionDocente", "Admin")" class="text-primary hover:text-secondary transition-colors" title="Volver a la lista">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-dark m-0">INFORMACION DE DOCENTE</h1>
+                    <p class="text-text-secondary m-0">Detalles del profesor seleccionado</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenido Principal -->
+        <main class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+            
+            <!-- Sección de Datos Personales -->
+            <section>
+                <h2 class="text-xl font-semibold text-text-secondary mt-0 mb-8 border-l-4 border-primary pl-4">
+                    Datos Personales
+                </h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Columna de Información -->
+                    <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-text-secondary">DNI</label>
+                            <p class="text-lg text-text-main">@docente.DNI</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-secondary">Nombre(s)</label>
+                            <p class="text-lg text-text-main">@docente.Nombres</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-text-secondary">Apellido(s)</label>
+                            <p class="text-lg text-text-main">@docente.Apellidos</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-secondary">Correo Electronico</label>
+                            <p class="text-lg text-text-main break-words">@docente.Correo</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-secondary">Celular</label>
+                            <p class="text-lg text-text-main">@docente.Celular</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-text-secondary">Direccion</label>
+                            <p class="text-lg text-text-main">@docente.Direccion</p>
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-text-secondary">Profesion</label>
+                            <p class="text-lg text-text-main">@docente.Profesion</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-secondary">Grado Academico</label>
+                            <p class="text-lg text-text-main">@docente.GradoAcademico</p>
+                        </div>
+                    </div>
+
+                    <!-- Columna de Imagen -->
+                    <div class="lg:col-span-1 flex flex-col items-center">
+                        <div class="w-full max-w-[250px] aspect-square rounded-lg overflow-hidden border-4 border-white shadow-lg">
+                           <img src="@docente.FotoUrl" alt="Foto de perfil del docente" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de Cursos Asignados -->
+            <section class="mt-10 pt-6 border-t border-gray-200">
+                <h2 class="text-xl font-semibold text-text-secondary mt-0 mb-8 border-l-4 border-primary pl-4">
+                    Cursos Asignados
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Curso</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Seccion</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Turno</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Fecha de Inicio</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Fecha de Fin</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Fila de ejemplo 1 -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main">Algebra Lineal</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">A-101</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">Manana</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">01/03/2024</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">15/07/2024</td>
+                            </tr>
+                            <!-- Fila de ejemplo 2 -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main">Calculo II</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">B-203</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">Tarde</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">01/03/2024</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">15/07/2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Botón de Acción -->
+            <div class="mt-10 pt-6 border-t border-gray-200 flex justify-end">
+                <a href="@Url.Action("GestionDocente", "Admin")" class="bg-white border border-gray-300 text-text-main px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-300">
+                    Cerrar
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
