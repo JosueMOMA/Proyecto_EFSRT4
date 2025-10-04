@@ -1,0 +1,24 @@
+SOLUCIÓN AL ERROR "No se pudo cargar el tipo 'EducaEFRT.MvcApplication'"
+================================================================
+
+PASOS A SEGUIR EN ORDEN:
+
+1. LIMPIAR EL PROYECTO:
+   - En Visual Studio: Build → Clean Solution
+
+2. EJECUTAR EL COMANDO NUGET:
+   - Herramientas → Administrador de paquetes NuGet → Consola del administrador de paquetes
+   - Ejecutar: Update-Package Microsoft.CodeDom.Providers.DotNetCompilerPlatform -Reinstall
+
+3. RECOMPILAR:
+   - Build → Rebuild Solution
+
+4. SI PERSISTE EL ERROR:
+   - Eliminar carpetas bin/ y obj/
+   - Volver a compilar
+
+5. VERIFICAR:
+   - Que el proyecto compile sin errores antes de ejecutar
+   - Que aparezca el archivo EducaEFRT.dll en la carpeta bin/
+
+El error indica que la aplicación no encuentra la clase MvcApplication porque el proyecto no se compiló correctamente.

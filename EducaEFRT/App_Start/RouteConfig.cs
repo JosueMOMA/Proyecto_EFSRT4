@@ -13,6 +13,13 @@ namespace EducaEFRT
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Ruta específica para EditarDocente
+            routes.MapRoute(
+                name: "EditarDocente",
+                url: "Admin/EditarDocente/{id}",
+                defaults: new { controller = "Admin", action = "EditarDocente", id = UrlParameter.Optional }
+            );
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

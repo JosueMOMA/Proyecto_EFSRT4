@@ -7,6 +7,7 @@ using EducaEFRT.Filters;
 using EducaEFRT.Models;
 using EducaEFRT.Models.DB;
 using EducaEFRT.Models.DB.Repositories;
+using EducaEFRT.Models.ViewModels;
 
 namespace EducaEFRT.Controllers
 {
@@ -62,7 +63,90 @@ namespace EducaEFRT.Controllers
             if (Session["IdUsuario"] == null)
                 return RedirectToAction("Login", "Account");
 
-            return View("~/Views/Admin/GestionDocente/Detalle.cshtml");
+            using (var db = new EduControlDB())
+            {
+                var docente = db.Docentes.FirstOrDefault(d => d.IdDocente == id);
+                if (docente == null)
+                    return HttpNotFound();
+
+                var viewModel = new DocenteEditViewModel
+                {
+                    Id = docente.IdDocente,
+                    Nombres = docente.Nombres ?? "",
+                    Apellidos = docente.Apellidos ?? "",
+                    Dni = docente.Dni ?? "",
+                    Correo = docente.Correo ?? "",
+                    Celular = docente.Celular ?? "",
+                    Direccion = docente.Direccion ?? "",
+                    Profesion = docente.Profesion ?? "",
+                    GradoAcademico = docente.GradoAcademico ?? "",
+                    FotoUrl = docente.FotoUrl ?? "",
+                    CursosAsignados = new List<CursoAsignadoViewModel>()
+                };
+
+                return View("~/Views/Admin/GestionDocente/Detalle.cshtml", viewModel);
+            }
+        }
+
+        public ActionResult EditarDocente(int id)
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Account");
+
+            using (var db = new EduControlDB())
+            {
+                var docente = db.Docentes.FirstOrDefault(d => d.IdDocente == id);
+                if (docente == null)
+                    return HttpNotFound();
+
+                // Cargar datos reales de la base de datos
+                var viewModel = new DocenteEditViewModel
+                {
+                    Id = docente.IdDocente,
+                    Nombres = docente.Nombres ?? "",
+                    Apellidos = docente.Apellidos ?? "",
+                    Dni = docente.Dni ?? "",
+                    Correo = docente.Correo ?? "",
+                    Celular = docente.Celular ?? "",
+                    Direccion = docente.Direccion ?? "",
+                    Profesion = docente.Profesion ?? "",
+                    GradoAcademico = docente.GradoAcademico ?? "",
+                    FotoUrl = docente.FotoUrl ?? "",
+                    CursosAsignados = new List<CursoAsignadoViewModel>()
+                };
+
+                return View("~/Views/Admin/GestionDocente/Editar.cshtml", viewModel);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult Guardar(DocenteEditViewModel model)
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Account");
+
+            using (var db = new EduControlDB())
+            {
+                var docente = db.Docentes.FirstOrDefault(d => d.IdDocente == model.Id);
+                if (docente != null)
+                {
+                    // Actualizar todos los campos
+                    docente.Nombres = model.Nombres;
+                    docente.Apellidos = model.Apellidos;
+                    docente.Dni = model.Dni;
+                    docente.Correo = model.Correo;
+                    docente.Celular = model.Celular;
+                    docente.Direccion = model.Direccion;
+                    docente.Profesion = model.Profesion;
+                    docente.GradoAcademico = model.GradoAcademico;
+                    docente.FotoUrl = model.FotoUrl;
+                    
+                    db.SaveChanges();
+                    return RedirectToAction("GestionDocente");
+                }
+            }
+
+            return View("~/Views/Admin/GestionDocente/Editar.cshtml", model);
         }
     }
 }

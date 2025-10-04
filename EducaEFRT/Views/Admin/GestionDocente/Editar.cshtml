@@ -1,0 +1,190 @@
+@model EducaEFRT.Models.ViewModels.DocenteEditViewModel
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Información de Docente</title>
+    
+    <!-- Inclusión de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Inclusión de la fuente Poppins desde Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Configuración personalizada de Tailwind CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4361ee',
+                        'secondary': '#3f37c9',
+                        'accent': '#4895ef',
+                        'dark': '#0d3b66',
+                        'light': '#f8f9fa',
+                        'primary-light': '#eef2ff',
+                        'text-main': '#334155',
+                        'text-secondary': '#64748b'
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-poppins min-h-screen p-4">
+    
+    <div class="w-full max-w-4xl mx-auto bg-light rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
+        
+        <!-- Encabezado -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-dark text-center flex-grow">
+                Informacion del Docente
+            </h1>
+            @Html.ActionLink("X", "GestionDocente", new { }, new { @class = "text-gray-400 hover:text-gray-600 text-2xl" })
+        </div>
+
+        @using (Html.BeginForm("Guardar", "Admin", FormMethod.Post, new { enctype = "multipart/form-data", @class = "space-y-8" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            
+            <!-- Sección: Datos Personales -->
+            <fieldset class="border-t border-gray-300 pt-4">
+                <legend class="text-lg font-semibold text-text-main px-2">Datos Personales</legend>
+                
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Columna de campos de texto -->
+                    <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                        
+                        <div>
+                            @Html.LabelFor(m => m.Dni, new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.Dni, new { @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+                        
+                        <div>
+                            @Html.LabelFor(m => m.Nombres, "Nombre(s)", new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.Nombres, new { @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+                        
+                        <div>
+                            @Html.LabelFor(m => m.Apellidos, "Apellido(s)", new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.Apellidos, new { @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+                        
+                        <div>
+                            @Html.LabelFor(m => m.Correo, new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.Correo, new { type = "email", @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+
+                        <div>
+                            @Html.LabelFor(m => m.Celular, new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.Celular, new { @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+
+                        <div>
+                            @Html.LabelFor(m => m.Direccion, "Direccion", new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.Direccion, new { @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+
+                        <div>
+                            @Html.LabelFor(m => m.Profesion, "Profesion", new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.Profesion, new { @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+
+                        <div>
+                            @Html.LabelFor(m => m.GradoAcademico, "Grado Academico", new { @class = "block text-sm font-medium text-text-secondary" })
+                            @Html.TextBoxFor(m => m.GradoAcademico, new { @class = "mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" })
+                        </div>
+                    </div>
+                    
+                    <!-- Columna de la imagen -->
+                    <div class="flex flex-col items-center justify-center space-y-4">
+                        <div class="w-40 h-40 bg-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                            @if (!string.IsNullOrEmpty(Model.FotoUrl))
+                            {
+                                <img src="@Model.FotoUrl" alt="Foto del docente" class="w-full h-full object-cover rounded-md">
+                            }
+                            else
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            }
+                        </div>
+                        <button type="button" class="px-4 py-2 bg-white border border-gray-300 text-text-main font-semibold rounded-lg shadow-sm hover:bg-gray-50 text-sm">
+                            Cambiar
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Sección: Cursos Asignados -->
+            <fieldset class="border-t border-gray-300 pt-4">
+                <legend class="text-lg font-semibold text-text-main px-2">Cursos Asignados</legend>
+                
+                <div class="mt-4 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Curso</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Seccion</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Turno</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Fecha de Inicio</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Fecha de Fin</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-light divide-y divide-gray-200">
+                             @if (Model?.CursosAsignados != null && Model.CursosAsignados.Any())
+                            {
+                                foreach (var curso in Model.CursosAsignados)
+                                {
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main">@curso.Curso</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main">@curso.Seccion</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main">@curso.Turno</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main">@curso.FechaInicio</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main">@curso.FechaFin</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <div class="flex items-center space-x-3">
+                                                <button type="button" class="text-red-500 hover:text-red-700">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            <!-- Fila para agregar nuevo curso -->
+                             <tr>
+                                 <td colspan="5" class="px-6 py-4"></td>
+                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                     <button type="button" class="text-primary hover:text-secondary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                                        </svg>
+                                     </button>
+                                 </td>
+                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </fieldset>
+            
+            <!-- Botón de Guardar -->
+            <div class="flex justify-center pt-4">
+                <button type="submit" class="px-10 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Guardar
+                </button>
+            </div>
+        }
+    </div>
+
+</body>
+</html>

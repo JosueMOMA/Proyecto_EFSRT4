@@ -26,5 +26,30 @@ namespace EducaEFRT.Models
         [Required]
         [Column("id_usuario")]
         public int IdUsuario { get; set; }
+
+        [Column("dni")]
+        public string Dni { get; set; }
+
+        [Column("correo")]
+        public string Correo { get; set; }
+
+        [Column("celular")]
+        public string Celular { get; set; }
+
+        [Column("direccion")]
+        public string Direccion { get; set; }
+
+        [Column("profesion")]
+        public string Profesion { get; set; }
+
+        [Column("grado_academico")]
+        public string GradoAcademico { get; set; }
+
+        [Column("foto_url")]
+        public string FotoUrl { get; set; }
+
+        // Relación de navegación
+        [ForeignKey("IdUsuario")]
+        public virtual Usuario Usuario { get; set; }
     }
 }

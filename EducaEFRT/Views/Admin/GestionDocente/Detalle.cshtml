@@ -1,17 +1,6 @@
+@model EducaEFRT.Models.ViewModels.DocenteEditViewModel
 @{
     ViewData["Title"] = "Información de Docente";
-    // En un caso real, estos datos vendrían del @Model
-    var docente = new {
-        DNI = "12345678",
-        Nombres = "Juan Alberto",
-        Apellidos = "Perez Diaz",
-        Correo = "juan.perez@educontrol.com",
-        Celular = "+51 987 654 321",
-        Direccion = "Av. Siempre Viva 742",
-        Profesion = "Ingeniero de Sistemas",
-        GradoAcademico = "Magister en Educacion",
-        FotoUrl = "https://placehold.co/400x400/eef2ff/4361ee?text=JP"
-    };
 }
 
 <!DOCTYPE html>
@@ -85,42 +74,51 @@
                     <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         <div>
                             <label class="block text-sm font-medium text-text-secondary">DNI</label>
-                            <p class="text-lg text-text-main">@docente.DNI</p>
+                            <p class="text-lg text-text-main">@(Model.Dni ?? "Sin especificar")</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-text-secondary">Nombre(s)</label>
-                            <p class="text-lg text-text-main">@docente.Nombres</p>
+                            <p class="text-lg text-text-main">@(Model.Nombres ?? "Sin especificar")</p>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-text-secondary">Apellido(s)</label>
-                            <p class="text-lg text-text-main">@docente.Apellidos</p>
+                            <p class="text-lg text-text-main">@(Model.Apellidos ?? "Sin especificar")</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-text-secondary">Correo Electronico</label>
-                            <p class="text-lg text-text-main break-words">@docente.Correo</p>
+                            <p class="text-lg text-text-main break-words">@(Model.Correo ?? "Sin especificar")</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-text-secondary">Celular</label>
-                            <p class="text-lg text-text-main">@docente.Celular</p>
+                            <p class="text-lg text-text-main">@(Model.Celular ?? "Sin especificar")</p>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-text-secondary">Direccion</label>
-                            <p class="text-lg text-text-main">@docente.Direccion</p>
+                            <p class="text-lg text-text-main">@(Model.Direccion ?? "Sin especificar")</p>
                         </div>
                          <div>
                             <label class="block text-sm font-medium text-text-secondary">Profesion</label>
-                            <p class="text-lg text-text-main">@docente.Profesion</p>
+                            <p class="text-lg text-text-main">@(Model.Profesion ?? "Sin especificar")</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-text-secondary">Grado Academico</label>
-                            <p class="text-lg text-text-main">@docente.GradoAcademico</p>
+                            <p class="text-lg text-text-main">@(Model.GradoAcademico ?? "Sin especificar")</p>
                         </div>
                     </div>
 
                     <!-- Columna de Imagen -->
                     <div class="lg:col-span-1 flex flex-col items-center">
                         <div class="w-full max-w-[250px] aspect-square rounded-lg overflow-hidden border-4 border-white shadow-lg">
-                           <img src="@docente.FotoUrl" alt="Foto de perfil del docente" class="w-full h-full object-cover">
+                           @if (!string.IsNullOrEmpty(Model.FotoUrl))
+                           {
+                               <img src="@Model.FotoUrl" alt="Foto de perfil del docente" class="w-full h-full object-cover">
+                           }
+                           else
+                           {
+                               <div class="w-full h-full bg-primary-light flex items-center justify-center text-primary text-6xl font-bold">
+                                   @(Model.Nombres?.Substring(0, 1) ?? "?")@(Model.Apellidos?.Substring(0, 1) ?? "?")
+                               </div>
+                           }
                         </div>
                     </div>
                 </div>
