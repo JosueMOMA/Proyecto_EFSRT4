@@ -1,0 +1,15 @@
+SOLUCIÓN AL ERROR DE COMPILACIÓN
+================================
+
+Si al ejecutar el proyecto aparece un error de compilación, ejecuta este comando en la Consola del Administrador de Paquetes NuGet:
+
+Update-Package Microsoft.CodeDom.Providers.DotNetCompilerPlatform -Reinstall
+
+PASOS:
+1. Abrir Visual Studio
+2. Ir a: Herramientas → Administrador de paquetes NuGet → Consola del administrador de paquetes
+3. Pegar y ejecutar: Update-Package Microsoft.CodeDom.Providers.DotNetCompilerPlatform -Reinstall
+4. Esperar a que termine la reinstalación
+5. Compilar el proyecto nuevamente
+
+Este comando reinstala el paquete del compilador de Roslyn que puede causar problemas de compilación en algunos entornos.

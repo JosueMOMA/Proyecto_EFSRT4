@@ -15,6 +15,9 @@ namespace EducaEFRT.Models.DB
             // Configuración adicional para evitar problemas
             Configuration.ProxyCreationEnabled = false;
             Configuration.LazyLoadingEnabled = false;
+            
+            // Deshabilitar migraciones automáticas
+            Database.SetInitializer<EduControlDB>(null);
         }
 
         public virtual DbSet<Usuario> Usuarios { get; set; }
