@@ -719,5 +719,18 @@ namespace EducaEFRT.Controllers
             
             return RedirectToAction("GestionDocente");
         }
+
+        // ==================== REPORTES ====================
+        public ActionResult Reportes()
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Account");
+
+            using (var db = new EduControlDB())
+            {
+                var asistencias = db.AsistenciasDocente.ToList();
+                return View("~/Views/Admin/Reportes/Reportes.cshtml", asistencias);
+            }
+        }
     }
 }
