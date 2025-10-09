@@ -1,4 +1,4 @@
-﻿@model IEnumerable<EducaEFRT.Models.AsistenciaDocente>
+@model IEnumerable<EducaEFRT.Models.ViewModels.ReporteAsistenciaViewModel>
 
 @{
     ViewData["Title"] = "Reportes de Asistencia";
@@ -108,31 +108,82 @@
                 <div class="flex flex-col">
                     <label for="docente" class="text-sm font-medium text-text-secondary mb-1">Docente</label>
                     <select id="docente" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-40">
-                        <option>Seleccione</option>
+                        <option value="">Todos</option>
+                        @if (ViewBag.Docentes != null)
+                        {
+                            foreach (var docente in ViewBag.Docentes)
+                            {
+                                <option value="@docente.Value">@docente.Text</option>
+                            }
+                        }
                     </select>
                 </div>
                 <div class="flex flex-col">
                     <label for="curso" class="text-sm font-medium text-text-secondary mb-1">Curso</label>
                     <select id="curso" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-40">
-                        <option>Seleccione</option>
+                        <option value="">Todos</option>
+                        @if (ViewBag.Cursos != null)
+                        {
+                            foreach (var curso in ViewBag.Cursos)
+                            {
+                                <option value="@curso.Value">@curso.Text</option>
+                            }
+                        }
                     </select>
                 </div>
                 <div class="flex flex-col">
                     <label for="seccion" class="text-sm font-medium text-text-secondary mb-1">Sección</label>
                     <select id="seccion" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-40">
-                        <option>Seleccione</option>
+                        <option value="">Todas</option>
+                        @if (ViewBag.Secciones != null)
+                        {
+                            foreach (var seccion in ViewBag.Secciones)
+                            {
+                                <option value="@seccion.Value">@seccion.Text</option>
+                            }
+                        }
                     </select>
                 </div>
                 <div class="flex flex-col">
                     <label for="turno" class="text-sm font-medium text-text-secondary mb-1">Turno</label>
                     <select id="turno" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-40">
-                        <option>Seleccione</option>
+                        <option value="">Todos</option>
+                        @if (ViewBag.Turnos != null)
+                        {
+                            foreach (var turno in ViewBag.Turnos)
+                            {
+                                <option value="@turno.Value">@turno.Text</option>
+                            }
+                        }
                     </select>
                 </div>
-                <button class="bg-gradient-button hover:bg-gradient-button-hover text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-300">
+                <button onclick="generarReporte()" class="bg-gradient-button hover:bg-gradient-button-hover text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-300">
                     Generar Reporte
                 </button>
+                <button onclick="limpiarFiltros()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-300">
+                    Limpiar Filtros
+                </button>
             </div>
+        </div>
+        
+        <!-- Debug Info -->
+        @if (ViewBag.Error != null)
+        {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <strong>Error:</strong> @ViewBag.Error
+            </div>
+        }
+        
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
+            <strong>Debug:</strong> Mostrando @(Model?.Count() ?? 0) registros
+            @if (Request.QueryString.Count > 0)
+            {
+                <br><strong>Filtros aplicados:</strong>
+                @foreach (string key in Request.QueryString.AllKeys)
+                {
+                    <span class="ml-2">@key = @Request.QueryString[key]</span>
+                }
+            }
         </div>
         
         <!-- Table Results Section -->
@@ -152,16 +203,40 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-main">Juan Eduardo Masias Toro</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">Power BI</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">A4</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">Mañana</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-text-main">20</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-green-600 font-bold">18</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600">1</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-yellow-600">1</td>
-                        </tr>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-main">@item.Docente</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">@item.Curso</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">@item.Seccion</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">@item.Turno</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-text-main">@item.TotalClases</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-green-600 font-bold">@item.Asistencias</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600">@item.Inasistencias</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-yellow-600">@item.Tardanzas</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="px-6 py-8 text-center text-text-secondary">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <p class="text-lg font-medium">No hay datos de asistencia disponibles</p>
+                                        <p class="text-sm">Ejecute el script test_data.sql para agregar datos de prueba</p>
+                                        @if (ViewBag.Error != null)
+                                        {
+                                            <p class="text-sm text-red-600 mt-2">Error: @ViewBag.Error</p>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -202,17 +277,84 @@
     </div>
 
     <script>
+        function generarReporte() {
+            const docente = document.getElementById('docente').value;
+            const curso = document.getElementById('curso').value;
+            const seccion = document.getElementById('seccion').value;
+            const turno = document.getElementById('turno').value;
+            
+            console.log('=== VALORES SELECCIONADOS ===');
+            console.log('docente:', docente);
+            console.log('curso:', curso);
+            console.log('seccion:', seccion);
+            console.log('turno:', turno);
+            
+            let url = '@Url.Action("Reportes", "Admin")';
+            let params = [];
+            
+            if (docente) params.push('docente=' + docente);
+            if (curso) params.push('curso=' + curso);
+            if (seccion) params.push('seccion=' + seccion);
+            if (turno) params.push('turno=' + turno);
+            
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            
+            console.log('URL final:', url);
+            window.location.href = url;
+        }
+        
+        function limpiarFiltros() {
+            window.location.href = '@Url.Action("Reportes", "Admin")';
+        }
+        
+        // Mantener valores seleccionados después del filtrado
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('docente')) {
+                document.getElementById('docente').value = urlParams.get('docente');
+            }
+            if (urlParams.get('curso')) {
+                document.getElementById('curso').value = urlParams.get('curso');
+            }
+            if (urlParams.get('seccion')) {
+                document.getElementById('seccion').value = urlParams.get('seccion');
+            }
+            if (urlParams.get('turno')) {
+                document.getElementById('turno').value = urlParams.get('turno');
+            }
+        });
+        
+        // Calcular totales de la tabla
+        let totalAsistencias = 0;
+        let totalInasistencias = 0;
+        let totalTardanzas = 0;
+        
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <text>
+                totalAsistencias += @item.Asistencias;
+                totalInasistencias += @item.Inasistencias;
+                totalTardanzas += @item.Tardanzas;
+                </text>
+            }
+        }
+        
         const ctx = document.getElementById('attendanceChart').getContext('2d');
         const attendanceChart = new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: ['Asistió', 'Faltó', 'Tardanza'],
                 datasets: [{
-                    data: [18, 1, 1],
+                    data: [totalAsistencias, totalInasistencias, totalTardanzas],
                     backgroundColor: [
-                        '#4361ee', // Azul oscuro
-                        '#7dd3fc', // Azul claro
-                        '#38bdf8'  // Azul medio
+                        '#4361ee',
+                        '#ef4444',
+                        '#eab308'
                     ],
                     borderWidth: 2,
                     borderColor: '#fff'

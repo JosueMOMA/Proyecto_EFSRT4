@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -7,14 +7,12 @@ using EducaEFRT.Filters;
 using EducaEFRT.Models;
 using EducaEFRT.Models.DB;
 using EducaEFRT.Models.DB.Repositories;
-using System.Data.Entity;   // 👈 necesario para Include()
+using System.Data.Entity;
 using EducaEFRT.Models.ViewModels;
 using System.IO;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
-using System.Web.Mvc;
-using System.Collections.Generic;
 
 namespace EducaEFRT.Controllers
 {
@@ -721,15 +719,74 @@ namespace EducaEFRT.Controllers
         }
 
         // ==================== REPORTES ====================
-        public ActionResult Reportes()
+        public ActionResult Reportes(int? docente = null, int? curso = null, int? seccion = null, int? turno = null)
         {
             if (Session["IdUsuario"] == null)
                 return RedirectToAction("Login", "Account");
 
+            // Debug de parámetros recibidos
+            System.Diagnostics.Debug.WriteLine($"=== PARÁMETROS RECIBIDOS ===");
+            System.Diagnostics.Debug.WriteLine($"docente: {docente}");
+            System.Diagnostics.Debug.WriteLine($"curso: {curso}");
+            System.Diagnostics.Debug.WriteLine($"seccion: {seccion}");
+            System.Diagnostics.Debug.WriteLine($"turno: {turno}");
+            System.Diagnostics.Debug.WriteLine($"QueryString completo: {Request.QueryString}");
+
             using (var db = new EduControlDB())
             {
-                var asistencias = db.AsistenciasDocente.ToList();
-                return View("~/Views/Admin/Reportes/Reportes.cshtml", asistencias);
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"Ejecutando consulta con filtros: docente={docente}, curso={curso}, seccion={seccion}, turno={turno}");
+                    
+                    var reportes = db.Database.SqlQuery<ReporteAsistenciaViewModel>(
+                        "EXEC sp_ReporteAsistenciaDocente @id_docente, @id_curso, @id_seccion, @id_turno",
+                        new SqlParameter("@id_docente", (object)docente ?? DBNull.Value),
+                        new SqlParameter("@id_curso", (object)curso ?? DBNull.Value),
+                        new SqlParameter("@id_seccion", (object)seccion ?? DBNull.Value),
+                        new SqlParameter("@id_turno", (object)turno ?? DBNull.Value)
+                    ).ToList();
+                    
+                    System.Diagnostics.Debug.WriteLine($"Registros obtenidos después del filtro: {reportes.Count}");
+                    
+                    // Cargar datos para los selectores
+                    ViewBag.Docentes = db.Docentes.Select(d => new SelectListItem
+                    {
+                        Value = d.IdDocente.ToString(),
+                        Text = d.Nombres + " " + d.Apellidos,
+                        Selected = d.IdDocente == docente
+                    }).ToList();
+                    
+                    ViewBag.Cursos = db.Cursos.Select(c => new SelectListItem
+                    {
+                        Value = c.IdCurso.ToString(),
+                        Text = c.NombreCurso,
+                        Selected = c.IdCurso == curso
+                    }).ToList();
+                    
+                    ViewBag.Secciones = db.Secciones.Select(s => new SelectListItem
+                    {
+                        Value = s.IdSeccion.ToString(),
+                        Text = s.NombreSeccion,
+                        Selected = s.IdSeccion == seccion
+                    }).ToList();
+                    
+                    ViewBag.Turnos = db.Turnos.Select(t => new SelectListItem
+                    {
+                        Value = t.IdTurno.ToString(),
+                        Text = t.NombreTurno,
+                        Selected = t.IdTurno == turno
+                    }).ToList();
+                    
+                    System.Diagnostics.Debug.WriteLine($"Reportes encontrados: {reportes.Count}");
+                    
+                    return View("~/Views/Admin/Reportes/Reportes.cshtml", reportes);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error completo: {ex.ToString()}");
+                    ViewBag.Error = ex.Message;
+                    return View("~/Views/Admin/Reportes/Reportes.cshtml", new List<ReporteAsistenciaViewModel>());
+                }
             }
         }
     }
