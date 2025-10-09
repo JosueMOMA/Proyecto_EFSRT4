@@ -1,0 +1,184 @@
+@model IEnumerable<EducaEFRT.Models.ViewModels.CursoGestionViewModel>
+@{
+    ViewData["Title"] = "Gestión de Cursos";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EduControl</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4361ee',
+                        'secondary': '#3f37c9',
+                        'accent': '#4895ef',
+                        'dark': '#0d3b66',
+                        'light': '#f8f9fa',
+                        'primary-light': '#eef2ff',
+                        'text-main': '#334155',
+                        'text-secondary': '#64748b'
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .bg-gradient-custom {
+            background: linear-gradient(135deg, #f6f8fc 0%, #e8effa 100%);
+        }
+
+        .bg-gradient-button {
+            background: linear-gradient(90deg, #4361ee 0%, #4895ef 100%);
+        }
+
+        .bg-gradient-button-hover {
+            background: linear-gradient(90deg, #3f37c9 0%, #4361ee 100%);
+        }
+    </style>
+</head>
+
+<body class="font-poppins bg-gradient-custom text-text-main min-h-screen">
+    <div class="w-full p-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+            <div class="flex items-center gap-4">
+                <a href="@Url.Action("PanelAdmin", "Admin")" class="text-primary hover:text-secondary transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-dark m-0">GESTIÓN DE CURSOS</h1>
+                    <p class="text-text-secondary m-0">Administrar los cursos registrados</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <form action="@Url.Action("Logout", "Account")" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="text-primary font-semibold hover:text-secondary transition-colors duration-300 bg-transparent border-0 cursor-pointer">
+                        Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Actions Bar -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-4">
+                <a href="@Url.Action("CrearCurso", "Admin")" class="bg-gradient-button hover:bg-gradient-button-hover text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 no-underline">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Nuevo Curso
+                </a>
+            </div>
+            <div class="flex gap-4">
+                <input type="text" placeholder="Buscar curso..." class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+            </div>
+        </div>
+
+        <!-- Cursos Table -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">Curso</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">Sección</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Turno</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Docente</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Fecha Inicio</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Fecha Fin</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">Matriculados</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach (var curso in Model)
+                        {
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <!-- Curso (imagen + nombre) -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-4">
+                                        @if (!string.IsNullOrEmpty(curso.ImagenUrl))
+                                        {
+                                            <img src="@Url.Content(curso.ImagenUrl)" alt="Imagen Curso" class="w-12 h-12 rounded-lg object-cover border" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-12 h-12 rounded-lg bg-primary-light flex items-center justify-center text-primary font-semibold">
+                                                @curso.NombreCurso.Substring(0, 1)
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="text-sm font-semibold text-text-main">@curso.NombreCurso</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-text-secondary">@curso.NombreSeccion</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">@curso.NombreTurno</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">@curso.NombreDocente</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                                    @(curso.FechaInicio == DateTime.MinValue ? "Sin asignar" : curso.FechaInicio.ToString("dd/MM/yyyy"))
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                                    @(curso.FechaFin == DateTime.MinValue ? "Sin asignar" : curso.FechaFin.ToString("dd/MM/yyyy"))
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold ">@curso.CantidadMatriculados</td>
+
+                                <!-- Acciones -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex gap-2">
+                                        <a href="@Url.Action("DetalleCurso", "Admin", new { id = curso.IdCurso })"
+                                           class="text-primary hover:text-secondary transition-colors">
+
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                        <a href="@Url.Action("EditarCurso", "Admin", new { id = curso.IdCurso })" class="text-green-600 hover:text-green-800 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </a>
+                                        <a href="@Url.Action("EliminarCurso", "Admin", new { id = curso.IdAsignacion })" class="text-red-600 hover:text-red-800 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

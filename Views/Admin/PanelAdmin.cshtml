@@ -1,0 +1,122 @@
+@{
+    ViewData["Title"] = "Panel de Administrador";
+    var nombreUsuario = ViewBag.NombreUsuario as string;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EduControl</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4361ee',
+                        'secondary': '#3f37c9',
+                        'accent': '#4895ef',
+                        'dark': '#0d3b66',
+                        'light': '#f8f9fa',
+                        'primary-light': '#eef2ff',
+                        'text-main': '#334155',
+                        'text-secondary': '#64748b'
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .bg-gradient-custom {
+            background: linear-gradient(135deg, #f6f8fc 0%, #e8effa 100%);
+        }
+
+        .bg-gradient-button {
+            background: linear-gradient(90deg, #4361ee 0%, #4895ef 100%);
+        }
+
+        .bg-gradient-button-hover {
+            background: linear-gradient(90deg, #3f37c9 0%, #4361ee 100%);
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gradient-custom text-text-main min-h-screen flex items-center justify-center">
+    <div class="w-full  p-4">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+            <div>
+                <h1 class="text-4xl font-bold text-dark m-0">SISTEMA EDUCONTROL</h1>
+                <p class="text-text-secondary m-0">Menú Principal | Administrador</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <form action="@Url.Action("Logout", "Account")" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="text-primary font-semibold hover:text-secondary transition-colors duration-300 bg-transparent border-0 cursor-pointer">
+                        Cerrar Sesión
+                    </button>
+                </form>
+
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <p class="text-2xl mb-10">
+                Bienvenido, admin <strong class="text-primary font-semibold"> <span style="text-transform: uppercase;">@nombreUsuario</span></strong>
+            </p>
+
+
+            <!-- Control Panel -->
+            <section class="w-full bg-white rounded-2xl p-10 shadow-lg border border-gray-100">
+                <h2 class="text-xl font-semibold text-text-secondary mt-0 mb-8 border-l-4 border-primary pl-4">
+                    Panel de Control
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Docentes Card -->
+                    <a href="@Url.Action("GestionDocente", "Admin")" class="group bg-gradient-button hover:bg-gradient-button-hover text-white no-underline text-2xl font-semibold text-center p-10 rounded-xl shadow-lg transform transition-all duration-300 hover:-translate-y-3 hover:scale-105 hover:shadow-xl flex flex-col items-center justify-center">
+                        <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                        </svg>
+                        <span>DOCENTES</span>
+                    </a>
+
+                    <!-- Cursos Card -->
+                    <a href="@Url.Action("GestionCurso", "Admin")" class="group bg-gradient-button hover:bg-gradient-button-hover text-white no-underline text-2xl font-semibold text-center p-10 rounded-xl shadow-lg transform transition-all duration-300 hover:-translate-y-3 hover:scale-105 hover:shadow-xl flex flex-col items-center justify-center">
+                        <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>CURSOS</span>
+                    </a>
+
+                    <!-- Reportes Card -->
+                    <a href="/Reportes" class="group bg-gradient-button hover:bg-gradient-button-hover text-white no-underline text-2xl font-semibold text-center p-10 rounded-xl shadow-lg transform transition-all duration-300 hover:-translate-y-3 hover:scale-105 hover:shadow-xl flex flex-col items-center justify-center">
+                        <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                        </svg>
+                        <span>REPORTES</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

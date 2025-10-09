@@ -1,0 +1,51 @@
+﻿@model EducaEFRT.Models.ViewModels.RegistrarAsistenciaDocenteViewModel
+@{
+    ViewBag.Title = "Registrar Asistencia";
+}
+
+<h2>Registrar Asistencia</h2>
+
+<div style="display:flex; justify-content:space-between; align-items:flex-start; padding:30px; border:1px solid #ccc; border-radius:10px;">
+    <!-- Lado izquierdo: datos del curso -->
+    <div style="flex:1; margin-right:30px;">
+        <div style="margin-bottom:15px;">
+            <label><strong>Curso:</strong></label>
+            <div>@Model.Curso</div>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label><strong>Sección:</strong></label>
+            <div>@Model.Seccion</div>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label><strong>Turno:</strong></label>
+            <div>@Model.Turno</div>
+        </div>
+    </div>
+
+    <!-- Lado derecho: reloj y botón -->
+    <div style="flex:1; text-align:center;">
+        <div id="clock" style="font-size:2rem; font-weight:bold; margin-bottom:20px;"></div>
+
+        @using (Html.BeginForm("RegistrarAsistencia", "Docente", FormMethod.Post))
+        {
+            @Html.HiddenFor(m => m.IdAsignacion)
+            <button type="submit" class="btn btn-success btn-lg">GUARDAR ASISTENCIA</button>
+        }
+    </div>
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
+
+
+

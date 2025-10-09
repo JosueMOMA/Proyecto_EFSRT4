@@ -1,0 +1,190 @@
+@model EducaEFRT.Models.ViewModels.CursoInfoViewModel
+
+@{
+    ViewData["Title"] = "Editar Curso";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EduControl</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4361ee',
+                        'secondary': '#3f37c9',
+                        'accent': '#4895ef',
+                        'dark': '#0d3b66',
+                        'light': '#f8f9fa',
+                        'primary-light': '#eef2ff',
+                        'text-main': '#334155',
+                        'text-secondary': '#64748b'
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .bg-gradient-custom {
+            background: linear-gradient(135deg, #f6f8fc 0%, #e8effa 100%);
+        }
+
+        .modal {
+            background-color: rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+
+<body class="font-poppins bg-gradient-custom text-text-main min-h-screen">
+    <div class="w-full max-w-4xl mx-auto p-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+            <div class="flex items-center gap-4">
+                <a href="@Url.Action("GestionCurso", "Admin")" class="text-primary hover:text-secondary transition-colors" title="Volver a la lista">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-dark m-0">EDITAR CURSO</h1>
+                    <p class="text-text-secondary m-0">Modifique los datos del curso</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenido principal -->
+        <main class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+            @using (Html.BeginForm("EditarCurso", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdCurso)
+
+                <!-- Sección de Información del Curso -->
+                <section>
+                    <h2 class="text-xl font-semibold text-text-secondary mt-0 mb-8 border-l-4 border-primary pl-4">
+                        Datos del Curso
+                    </h2>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Información -->
+                        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-text-secondary">Nombre del curso</label>
+                                @Html.TextBoxFor(m => m.NombreCurso, new { @class = "w-full border rounded-lg px-3 py-2 mt-1" })
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary">Duración (horas)</label>
+                                @Html.TextBoxFor(m => m.DuracionHoras, new { @class = "w-full border rounded-lg px-3 py-2 mt-1", type = "number", min = "1" })
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary">Nivel</label>
+                                @Html.DropDownListFor(m => m.Nivel,
+                                    new SelectList(new[]
+                                    {
+                                        new { Value = "Básico", Text = "Básico" },
+                                        new { Value = "Intermedio", Text = "Intermedio" },
+                                        new { Value = "Avanzado", Text = "Avanzado" }
+                                    }, "Value", "Text", Model.Nivel),
+                                    "-- Seleccione Nivel --",
+                                    new { @class = "w-full border rounded-lg px-3 py-2 mt-1" })
+                            </div>
+
+
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary">Certificación</label>
+                                <div class="flex items-center gap-2 mt-1">
+                                    @Html.CheckBoxFor(m => m.Certificacion, new { @class = "w-5 h-5 text-primary border-gray-300 rounded" })
+                                    <span class="text-text-main text-sm">¿Incluye certificado?</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary">Precio (S/.)</label>
+                                @Html.TextBoxFor(m => m.Precio, new { @class = "w-full border rounded-lg px-3 py-2 mt-1", type = "number", step = "5", min = "0" })
+                            </div>
+                        </div>
+
+                        <!-- Imagen del curso -->
+                        <div class="lg:col-span-1 flex flex-col items-center">
+                            <div class="w-full max-w-[250px] aspect-square rounded-lg overflow-hidden border-4 border-white shadow-lg flex items-center justify-center bg-gray-100 relative">
+                                <!-- siempre existe el <img> para que JS pueda actualizarlo -->
+                                <img id="previewImage"
+                                     src="@(string.IsNullOrEmpty(Model.ImagenUrl) ? "" : Url.Content(Model.ImagenUrl))"
+                                     alt="Imagen del curso"
+                                     class="w-full h-full object-cover @(string.IsNullOrEmpty(Model.ImagenUrl) ? "hidden" : "")" />
+
+                                @if (string.IsNullOrEmpty(Model.ImagenUrl))
+                                {
+                                    var inicial = "?";
+                                    if (!string.IsNullOrEmpty(Model.NombreCurso))
+                                    {
+                                        inicial = Model.NombreCurso.Substring(0, 1).ToUpper();
+                                    }
+                                    <span id="initialPlaceholder" class="absolute text-6xl font-bold text-gray-600">
+                                        @inicial
+                                    </span>
+                                }
+                            </div>
+
+                            <label class="mt-4 cursor-pointer bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-all duration-300">
+                                Cambiar Imagen
+                                <input type="file" name="ImagenFile" id="ImagenFile" accept="image/*" class="hidden" onchange="previewPhoto(event)" />
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Botones -->
+                <div class="mt-10 pt-6 border-t border-gray-200 flex justify-end gap-4">
+                    <a href="@Url.Action("GestionCurso", "Admin")" class="bg-white border border-gray-300 text-text-main px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-300">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-secondary transition-all duration-300">
+                        Guardar Cambios
+                    </button>
+                </div>
+            }
+        </main>
+    </div>
+
+    <script>
+        function previewPhoto(event) {
+            if (!event || !event.target || !event.target.files || !event.target.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = function () {
+                const img = document.getElementById('previewImage');
+                const initial = document.getElementById('initialPlaceholder');
+
+                // Ocultar placeholder si existe
+                if (initial) initial.style.display = 'none';
+
+                // Si existe la img (siempre existe en esta vista), actualizarla y mostrarla
+                if (img) {
+                    img.src = reader.result;
+                    img.classList.remove('hidden');
+                    img.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>
