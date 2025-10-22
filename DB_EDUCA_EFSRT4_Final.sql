@@ -11,7 +11,7 @@ GO
 CREATE TABLE Usuario (
     id_usuario INT PRIMARY KEY IDENTITY(1,1),
     Username VARCHAR(50) NOT NULL UNIQUE,
-    Password VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
+    Password VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CS_ASÂ NOTÂ NULL,
     Rol VARCHAR(50) NOT NULL
 );
 
@@ -87,7 +87,7 @@ CREATE TABLE AsistenciaDocente (
     id_asignacion INT NOT NULL FOREIGN KEY REFERENCES AsignacionCurso(id_asignacion),
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
-    estado_asistencia VARCHAR(10) CHECK (estado_asistencia IN ('Asistio','Falto','Tardanza')) NOT NULL -- Asistió, Falta, Tardanza
+    estado_asistencia VARCHAR(10) CHECK (estado_asistencia IN ('Asistio','Falto','Tardanza')) NOT NULL -- AsistiÃ³, Falta, Tardanza
 );
 
 -- Tabla Matricula
@@ -95,7 +95,7 @@ CREATE TABLE Matricula (
     id_matricula INT PRIMARY KEY IDENTITY(1,1),
     id_estudiante INT NOT NULL FOREIGN KEY REFERENCES Estudiante(id_estudiante),
     id_asignacion INT NOT NULL FOREIGN KEY REFERENCES AsignacionCurso(id_asignacion),
-	UNIQUE (id_estudiante, id_asignacion) -- No puede repetir misma asignación
+	UNIQUE (id_estudiante, id_asignacion) -- No puede repetir misma asignaciÃ³n
 );
 
 -- Tabla AsistenciaEstudiante
@@ -104,7 +104,7 @@ CREATE TABLE AsistenciaEstudiante (
     id_matricula INT NOT NULL FOREIGN KEY REFERENCES Matricula(id_matricula),
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
-    estado_asistencia VARCHAR(10) CHECK (estado_asistencia IN ('Asistio','Falto','Tardanza')) NOT NULL -- Asistió, Falta, Tardanza
+    estado_asistencia VARCHAR(10) CHECK (estado_asistencia IN ('Asistio','Falto','Tardanza')) NOT NULL -- AsistiÃ³, Falta, Tardanza
 );
 
 -- Tabla Notas
@@ -122,7 +122,7 @@ CREATE TABLE Notas (
 );
 GO
 
-/*EJEMPLO DE CONTRASEÑA
+/*EJEMPLO DE CONTRASEÃ‘A
 INSERT INTO Usuario (Username, Password, Rol)
 VALUES ('admin', 'Admin123@', 'Administrador');*/
 /*TRIGGER PARA EL ESTADO (APROBADO/DESAPROBADO)*/
@@ -146,7 +146,7 @@ GO
 /*INSERTAR DATOS*/
 -- Tabla: Turno
 INSERT INTO Turno (nombre_turno) VALUES
-('Mañana'),
+('MaÃ±ana'),
 ('Tarde'),
 ('Noche');
 
@@ -162,7 +162,7 @@ INSERT INTO Seccion (nombre_seccion) VALUES
 -- Tabla: Usuario (Administrador y Docentes)
 INSERT INTO Usuario (Username, Password, Rol) VALUES
 ('admin', 'Admin2025@', 'Administrador'),
-('dcastañeda', 'DaniC123@', 'Docente'),
+('aJara', 'AbraJar123@', 'Docente'),
 ('mrodriguez', 'MariaR123@', 'Docente'),
 ('jvaldez', 'JoseVal123@', 'Docente'),
 ('rsanchez', 'RosaS123@', 'Docente'),
@@ -178,26 +178,26 @@ INSERT INTO Docente (
     dni, nombres, apellidos, correo, celular, direccion, profesion, grado_academico, foto, id_usuario
 )
 VALUES
-('12345678', 'Daniel Alexis', 'Ramos Castañeda', 'daniel.ramos@example.com', '987654321', 'Av. Los Olivos 123', 'Ingeniero de Sistemas', 'Maestría en Educación', NULL, 2),
-('23456789', 'Maria Ruth', 'Rodríguez Ordoñez', 'maria.rodriguez@example.com', '976543210', 'Calle Primavera 456', 'Licenciada en Matemáticas', 'Doctorado en Ciencias', NULL, 3),
-('34567890', 'Jose Valerio', 'Valdez Montes', 'jose.valdez@example.com', '965432109', 'Jr. Lima 789', 'Ingeniero Informático', 'Maestría en Tecnología', NULL, 4),
-('45678901', 'Rosa Ana', 'Sanchez Savedra', 'rosa.sanchez@example.com', '954321098', 'Av. Brasil 101', 'Licenciada en Física', 'Maestría en Educación', NULL, 5),
-('56789012', 'Fernando Dean', 'Chávez Parker', 'fernando.chavez@example.com', '943210987', 'Pasaje La Paz 202', 'Ingeniero de Software', 'Maestría en Ingeniería', NULL, 6),
-('67890123', 'Beatriz Marta', 'Vasquez Coronel', 'beatriz.vasquez@example.com', '932109876', 'Calle Sol 303', 'Licenciada en Computación', 'Doctorado en Ciencias de la Computación', NULL, 7);
+('12345678', 'Abraham Oliver', 'Jara Miranda', 'abraham.jara@example.com', '987654321', 'Av. Los Olivos 123', 'Ingeniero de Sistemas', 'MaestrÃ­a en EducaciÃ³n', NULL, 2),
+('23456789', 'Maria Ruth', 'RodrÃ­guez OrdoÃ±ez', 'maria.rodriguez@example.com', '976543210', 'Calle Primavera 456', 'Licenciada en MatemÃ¡ticas', 'Doctorado en Ciencias', NULL, 3),
+('34567890', 'Jose Valerio', 'Valdez Montes', 'jose.valdez@example.com', '965432109', 'Jr. Lima 789', 'Ingeniero InformÃ¡tico', 'MaestrÃ­a en TecnologÃ­a', NULL, 4),
+('45678901', 'Rosa Ana', 'Sanchez Savedra', 'rosa.sanchez@example.com', '954321098', 'Av. Brasil 101', 'Licenciada en FÃ­sica', 'MaestrÃ­a en EducaciÃ³n', NULL, 5),
+('56789012', 'Fernando Dean', 'ChÃ¡vez Parker', 'fernando.chavez@example.com', '943210987', 'Pasaje La Paz 202', 'Ingeniero de Software', 'MaestrÃ­a en IngenierÃ­a', NULL, 6),
+('67890123', 'Beatriz Marta', 'Vasquez Coronel', 'beatriz.vasquez@example.com', '932109876', 'Calle Sol 303', 'Licenciada en ComputaciÃ³n', 'Doctorado en Ciencias de la ComputaciÃ³n', NULL, 7);
 
 -- Tabla: Curso
 INSERT INTO Curso (nombre_curso, imagen_url, duracion_horas, nivel, certificacion, precio) VALUES
-('Programación Web', 'https://teclab.edu.ar/wp-content/uploads/2023/12/Que-es-la-programacion-web.webp', 80, 'Intermedio', 1, 250.00),
-('Bases de Datos', 'https://revistabyte.es/wp-content/uploads/2019/02/Comparativa-Bases-de-Datos-2019.jpg.webp', 60, 'Básico', 1, 200.00),
-('Power BI Básico', 'https://learn.microsoft.com/es-es/power-bi/fundamentals/media/service-basic-concepts/power-bi-app-dashboard.png', 40, 'Básico', 1, 180.00),
+('ProgramaciÃ³n Web', 'https://teclab.edu.ar/wp-content/uploads/2023/12/Que-es-la-programacion-web.webp', 80, 'Intermedio', 1, 250.00),
+('Bases de Datos', 'https://revistabyte.es/wp-content/uploads/2019/02/Comparativa-Bases-de-Datos-2019.jpg.webp', 60, 'BÃ¡sico', 1, 200.00),
+('Power BI BÃ¡sico', 'https://learn.microsoft.com/es-es/power-bi/fundamentals/media/service-basic-concepts/power-bi-app-dashboard.png', 40, 'BÃ¡sico', 1, 180.00),
 ('Desarrollo Web', 'https://www.comunicare.es/wp-content/uploads/2021/11/desarrollo-web-3.jpg', 100, 'Avanzado', 1, 300.00),
 ('Inteligencia Artificial', 'https://www.seguritecnia.es/wp-content/uploads/2022/03/inteligencia-artificial.jpg', 120, 'Avanzado', 1, 350.00),
 ('Ciberseguridad', 'https://universidadeuropea.com/resources/media/images/analista-ciberseguridad-1200x630.original.jpg', 90, 'Intermedio', 1, 320.00),
 ('Cloud Computing', 'https://img.computing.es/wp-content/uploads/2024/03/19095219/Cloud-Computing-1.jpg', 70, 'Intermedio', 1, 280.00),
 ('Big Data', 'https://incae.edu/wp-content/uploads/2023/10/big_data_01.jpg', 110, 'Avanzado', 1, 330.00),
 ('Machine Learning', 'https://kodigowebstorage.blob.core.windows.net/kodigowebsite/2024/02/Machine-learning.jpg', 100, 'Avanzado', 1, 340.00),
-('Desarrollo Móvil', 'https://www.qualitydevs.com/wp-content/uploads/2021/03/Desarrollo-apps-moviles.jpg', 80, 'Intermedio', 1, 290.00),
-('Fundamentos de Algoritmos', 'https://cdn.lynda.com/course/2838139/2838139-1613993931720-16x9.jpg', 50, 'Básico', 1, 150.00);
+('Desarrollo MÃ³vil', 'https://www.qualitydevs.com/wp-content/uploads/2021/03/Desarrollo-apps-moviles.jpg', 80, 'Intermedio', 1, 290.00),
+('Fundamentos de Algoritmos', 'https://cdn.lynda.com/course/2838139/2838139-1613993931720-16x9.jpg', 50, 'BÃ¡sico', 1, 150.00);
 
 -- Tabla: AsignacionCurso
 INSERT INTO AsignacionCurso (id_docente, id_curso, id_seccion, id_turno, fecha_inicio, fecha_fin) VALUES
@@ -218,7 +218,7 @@ INSERT INTO AsignacionCurso (id_docente, id_curso, id_seccion, id_turno, fecha_i
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
 ('EDU001', 'Gonzales Navarro', 'Ana Cristel'),
 ('EDU002', 'Torres Mendoza', 'Carlos Augusto'),
-('EDU003', 'Ruiz Suarez', 'María Lucero'),
+('EDU003', 'Ruiz Suarez', 'MarÃ­a Lucero'),
 ('EDU004', 'Castro Sanchez', 'Sergio Valentino'),
 ('EDU005', 'Ramirez Roque', 'Laura Maria'),
 ('EDU006', 'Fernandez Bazan', 'Jorge Miguel'),
@@ -248,14 +248,14 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
 ('EDU014', 'Mendoza Torres', 'Luis Alberto'),
-('EDU015', 'Ramírez Castillo', 'María Fernanda'),
-('EDU016', 'González Pérez', 'Jorge Luis'),
-('EDU017', 'Fernández Rojas', 'Ana Sofía'),
-('EDU018', 'Sánchez Morales', 'Carlos Eduardo'),
-('EDU019', 'López Vargas', 'Valeria Isabel'),
-('EDU020', 'Pérez Flores', 'Miguel Ángel'),
-('EDU021', 'Rodríguez Jiménez', 'Lucía Carolina'),
-('EDU022', 'Torres Martínez', 'Diego Andrés'),
+('EDU015', 'RamÃ­rez Castillo', 'MarÃ­a Fernanda'),
+('EDU016', 'GonzÃ¡lez PÃ©rez', 'Jorge Luis'),
+('EDU017', 'FernÃ¡ndez Rojas', 'Ana SofÃ­a'),
+('EDU018', 'SÃ¡nchez Morales', 'Carlos Eduardo'),
+('EDU019', 'LÃ³pez Vargas', 'Valeria Isabel'),
+('EDU020', 'PÃ©rez Flores', 'Miguel Ãngel'),
+('EDU021', 'RodrÃ­guez JimÃ©nez', 'LucÃ­a Carolina'),
+('EDU022', 'Torres MartÃ­nez', 'Diego AndrÃ©s'),
 ('EDU023', 'Castillo Medina', 'Camila Patricia');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
@@ -271,16 +271,16 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (23, 1);
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
-('EDU024', 'Vásquez Herrera', 'Julio César'),
+('EDU024', 'VÃ¡squez Herrera', 'Julio CÃ©sar'),
 ('EDU025', 'Morales Delgado', 'Natalia Beatriz'),
 ('EDU026', 'Reyes Campos', 'Alonso Javier'),
-('EDU027', 'Chávez Luján', 'Melanie Rocío'),
+('EDU027', 'ChÃ¡vez LujÃ¡n', 'Melanie RocÃ­o'),
 ('EDU028', 'Silva Benavides', 'Daniel Alejandro'),
-('EDU029', 'Flores Zúñiga', 'Mónica Alejandra'),
-('EDU030', 'Ortega Meza', 'Esteban Raúl'),
+('EDU029', 'Flores ZÃºÃ±iga', 'MÃ³nica Alejandra'),
+('EDU030', 'Ortega Meza', 'Esteban RaÃºl'),
 ('EDU031', 'Carranza Soto', 'Andrea Marisol'),
-('EDU032', 'Córdova Pinedo', 'Santiago Emiliano'),
-('EDU033', 'Ríos Galvez', 'Valentina María');
+('EDU032', 'CÃ³rdova Pinedo', 'Santiago Emiliano'),
+('EDU033', 'RÃ­os Galvez', 'Valentina MarÃ­a');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (24, 2),
@@ -297,13 +297,13 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
 ('EDU034', 'Mendoza Salas', 'Alessandro Javier'),
 ('EDU035', 'Ramos Quispe', 'Camila Fernanda'),
-('EDU036', 'Delgado Infante', 'Samuel Andrés'),
-('EDU037', 'López Miranda', 'Isabella Ruth'),
-('EDU038', 'Valverde León', 'Joaquín Esteban'),
+('EDU036', 'Delgado Infante', 'Samuel AndrÃ©s'),
+('EDU037', 'LÃ³pez Miranda', 'Isabella Ruth'),
+('EDU038', 'Valverde LeÃ³n', 'JoaquÃ­n Esteban'),
 ('EDU039', 'Espinoza Barreto', 'Martina Carolina'),
-('EDU040', 'Paredes Tello', 'Matías Emanuel'),
-('EDU041', 'Gómez Ruiz', 'Luciana Belén'),
-('EDU042', 'Quinteros Vargas', 'Adrián Rafael'),
+('EDU040', 'Paredes Tello', 'MatÃ­as Emanuel'),
+('EDU041', 'GÃ³mez Ruiz', 'Luciana BelÃ©n'),
+('EDU042', 'Quinteros Vargas', 'AdriÃ¡n Rafael'),
 ('EDU043', 'Rosales Guevara', 'Emilia Antonia');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
@@ -319,16 +319,16 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (43, 3);
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
-('EDU044', 'Gutiérrez Méndez', 'Thiago Emmanuel'),
+('EDU044', 'GutiÃ©rrez MÃ©ndez', 'Thiago Emmanuel'),
 ('EDU045', 'Campos Rivas', 'Samantha Abigail'),
-('EDU046', 'Navarro Zegarra', 'Gabriel Matías'),
-('EDU047', 'Peralta Sánchez', 'Renata Milagros'),
-('EDU048', 'Cornejo Paredes', 'Benjamín Alejandro'),
+('EDU046', 'Navarro Zegarra', 'Gabriel MatÃ­as'),
+('EDU047', 'Peralta SÃ¡nchez', 'Renata Milagros'),
+('EDU048', 'Cornejo Paredes', 'BenjamÃ­n Alejandro'),
 ('EDU049', 'Silva Robles', 'Valentina Nicole'),
-('EDU050', 'Aguilar Tapia', 'Dylan Sebastián'),
-('EDU051', 'Cruz Huamán', 'Antonella Sofía'),
+('EDU050', 'Aguilar Tapia', 'Dylan SebastiÃ¡n'),
+('EDU051', 'Cruz HuamÃ¡n', 'Antonella SofÃ­a'),
 ('EDU052', 'Reyes Palacios', 'Diego Armando'),
-('EDU053', 'Morales Cárdenas', 'Julieta Celeste');
+('EDU053', 'Morales CÃ¡rdenas', 'Julieta Celeste');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (44, 4),
@@ -343,16 +343,16 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (53, 4);
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
-('EDU054', 'Valverde Cuéllar', 'Luciana Camila'),
-('EDU055', 'Ríos Luján', 'Joaquín Ignacio'),
-('EDU056', 'Sánchez Bravo', 'Emily Adriana'),
-('EDU057', 'Mendoza Romero', 'Santiago Andrés'),
-('EDU058', 'Velásquez Ocampo', 'Camila Fernanda'),
-('EDU059', 'Ramírez Bernal', 'Mateo Alonso'),
-('EDU060', 'Castañeda Vela', 'Ariana Belén'),
-('EDU061', 'Ponce Loayza', 'Gael Joaquín'),
+('EDU054', 'Valverde CuÃ©llar', 'Luciana Camila'),
+('EDU055', 'RÃ­os LujÃ¡n', 'JoaquÃ­n Ignacio'),
+('EDU056', 'SÃ¡nchez Bravo', 'Emily Adriana'),
+('EDU057', 'Mendoza Romero', 'Santiago AndrÃ©s'),
+('EDU058', 'VelÃ¡squez Ocampo', 'Camila Fernanda'),
+('EDU059', 'RamÃ­rez Bernal', 'Mateo Alonso'),
+('EDU060', 'CastaÃ±eda Vela', 'Ariana BelÃ©n'),
+('EDU061', 'Ponce Loayza', 'Gael JoaquÃ­n'),
 ('EDU062', 'Salas Reynoso', 'Isabella Antonella'),
-('EDU063', 'Cárdenas Torres', 'Matías Emmanuel');
+('EDU063', 'CÃ¡rdenas Torres', 'MatÃ­as Emmanuel');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (54, 5),
@@ -367,16 +367,16 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (63, 5);
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
-('EDU064', 'Reátegui Delgado', 'Thiago Daniel'),
-('EDU065', 'Silva Córdova', 'Mía Valentina'),
-('EDU066', 'Zamora Gutiérrez', 'Gabriel Esteban'),
-('EDU067', 'Oré Quispe', 'Sofía Isabella'),
+('EDU064', 'ReÃ¡tegui Delgado', 'Thiago Daniel'),
+('EDU065', 'Silva CÃ³rdova', 'MÃ­a Valentina'),
+('EDU066', 'Zamora GutiÃ©rrez', 'Gabriel Esteban'),
+('EDU067', 'OrÃ© Quispe', 'SofÃ­a Isabella'),
 ('EDU068', 'Rosales Aguirre', 'Liam Mateo'),
-('EDU069', 'Pizarro Castañeda', 'Emily Victoria'),
-('EDU070', 'Guerra Tapia', 'Benjamín Aarón'),
+('EDU069', 'Pizarro CastaÃ±eda', 'Emily Victoria'),
+('EDU070', 'Guerra Tapia', 'BenjamÃ­n AarÃ³n'),
 ('EDU071', 'Cabello Gonzales', 'Valeria Alejandra'),
-('EDU072', 'Arévalo Meza', 'Derek Santiago'),
-('EDU073', 'Vásquez Córdova', 'Zoe Camila');
+('EDU072', 'ArÃ©valo Meza', 'Derek Santiago'),
+('EDU073', 'VÃ¡squez CÃ³rdova', 'Zoe Camila');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (64, 6),
@@ -391,16 +391,16 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (73, 6);
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
-('EDU074', 'Campos Leiva', 'Renato Adrián'),
-('EDU075', 'Barboza Díaz', 'Julieta Romina'),
-('EDU076', 'Moreno Córdova', 'Matías Emmanuel'),
-('EDU077', 'Calderón Vega', 'Victoria Paz'),
+('EDU074', 'Campos Leiva', 'Renato AdriÃ¡n'),
+('EDU075', 'Barboza DÃ­az', 'Julieta Romina'),
+('EDU076', 'Moreno CÃ³rdova', 'MatÃ­as Emmanuel'),
+('EDU077', 'CalderÃ³n Vega', 'Victoria Paz'),
 ('EDU078', 'Urbina Romero', 'Diego Alonso'),
 ('EDU079', 'Alfaro Espinoza', 'Luciana Rafaela'),
-('EDU080', 'Ramírez Loayza', 'Ian Alessandro'),
+('EDU080', 'RamÃ­rez Loayza', 'Ian Alessandro'),
 ('EDU081', 'Guevara Rojas', 'Camila Antonella'),
-('EDU082', 'Valverde Olivares', 'Sebastián Joaquín'),
-('EDU083', 'Espejo Farfán', 'Daniela Rebeca');
+('EDU082', 'Valverde Olivares', 'SebastiÃ¡n JoaquÃ­n'),
+('EDU083', 'Espejo FarfÃ¡n', 'Daniela Rebeca');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (74, 7),
@@ -415,16 +415,16 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (83, 7);
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
-('EDU084', 'Ríos Gallardo', 'Thiago Emanuel'),
-('EDU085', 'Carranza Paredes', 'Sofía Elizabeth'),
-('EDU086', 'Mejía Rivas', 'Álvaro Ignacio'),
+('EDU084', 'RÃ­os Gallardo', 'Thiago Emanuel'),
+('EDU085', 'Carranza Paredes', 'SofÃ­a Elizabeth'),
+('EDU086', 'MejÃ­a Rivas', 'Ãlvaro Ignacio'),
 ('EDU087', 'Mendoza Vargas', 'Isabella Antonia'),
-('EDU088', 'Zambrano Campos', 'Samuel Josué'),
+('EDU088', 'Zambrano Campos', 'Samuel JosuÃ©'),
 ('EDU089', 'Figueroa Aguirre', 'Antonella Fiorella'),
-('EDU090', 'Acosta Guzmán', 'Valentino Nicolás'),
-('EDU091', 'Aguilar Neyra', 'Martina Jazmín'),
-('EDU092', 'Rosales Díaz', 'Joaquín Gabriel'),
-('EDU093', 'Sánchez Marquina', 'Emma Nicole');
+('EDU090', 'Acosta GuzmÃ¡n', 'Valentino NicolÃ¡s'),
+('EDU091', 'Aguilar Neyra', 'Martina JazmÃ­n'),
+('EDU092', 'Rosales DÃ­az', 'JoaquÃ­n Gabriel'),
+('EDU093', 'SÃ¡nchez Marquina', 'Emma Nicole');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (84, 8),
@@ -440,14 +440,14 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
 ('EDU094', 'Silva Gamarra', 'Luciana Isabella'),
-('EDU095', 'Ortega Chávez', 'Mateo Alejandro'),
-('EDU096', 'Delgado Núñez', 'Camila Valeria'),
+('EDU095', 'Ortega ChÃ¡vez', 'Mateo Alejandro'),
+('EDU096', 'Delgado NÃºÃ±ez', 'Camila Valeria'),
 ('EDU097', 'Guevara Herrera', 'Diego Alonso'),
-('EDU098', 'Córdova Mejía', 'Alejandra Milagros'),
-('EDU099', 'Pizarro Alvarado', 'Sebastián Andrés'),
+('EDU098', 'CÃ³rdova MejÃ­a', 'Alejandra Milagros'),
+('EDU099', 'Pizarro Alvarado', 'SebastiÃ¡n AndrÃ©s'),
 ('EDU100', 'Morales Benavente', 'Valeria Antonella'),
 ('EDU101', 'Ramos Loyola', 'Gael Esteban'),
-('EDU102', 'Campos Lévano', 'Emma Sofía'),
+('EDU102', 'Campos LÃ©vano', 'Emma SofÃ­a'),
 ('EDU103', 'Villanueva Barrios', 'Liam Santiago');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
@@ -463,16 +463,16 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (103, 9);
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
-('EDU104', 'Salinas Ríos', 'Gabriela Alessandra'),
-('EDU105', 'Luna Huamán', 'Thiago Alexander'),
+('EDU104', 'Salinas RÃ­os', 'Gabriela Alessandra'),
+('EDU105', 'Luna HuamÃ¡n', 'Thiago Alexander'),
 ('EDU106', 'Aguilar Ponce', 'Isabela Ariana'),
 ('EDU107', 'Escobar Tello', 'Emilio Leonardo'),
 ('EDU108', 'Carrillo Galindo', 'Victoria Fernanda'),
-('EDU109', 'Reyna Zegarra', 'Matías Emmanuel'),
+('EDU109', 'Reyna Zegarra', 'MatÃ­as Emmanuel'),
 ('EDU110', 'Loayza Carranza', 'Renata Ivanna'),
-('EDU111', 'Bustamante Aguirre', 'Martín Enrique'),
-('EDU112', 'Bravo Monzón', 'Alessia Michelle'),
-('EDU113', 'Pacheco Canales', 'Julián Mateo');
+('EDU111', 'Bustamante Aguirre', 'MartÃ­n Enrique'),
+('EDU112', 'Bravo MonzÃ³n', 'Alessia Michelle'),
+('EDU113', 'Pacheco Canales', 'JuliÃ¡n Mateo');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (104, 10),
@@ -488,15 +488,15 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 
 INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
 ('EDU114', 'Ortega Valdez', 'Camila Julieta'),
-('EDU115', 'Velarde León', 'Sebastián Andrés'),
-('EDU116', 'Arévalo Cuéllar', 'Valentina Rosario'),
+('EDU115', 'Velarde LeÃ³n', 'SebastiÃ¡n AndrÃ©s'),
+('EDU116', 'ArÃ©valo CuÃ©llar', 'Valentina Rosario'),
 ('EDU117', 'Sotomayor Prado', 'Diego Alonso'),
-('EDU118', 'Guillén Rivas', 'Mía Antonella'),
-('EDU119', 'Portilla Álvarez', 'Benjamín Josué'),
+('EDU118', 'GuillÃ©n Rivas', 'MÃ­a Antonella'),
+('EDU119', 'Portilla Ãlvarez', 'BenjamÃ­n JosuÃ©'),
 ('EDU120', 'Yupanqui Matos', 'Luciana Nicole'),
-('EDU121', 'Chávez Huerta', 'Gael Rodrigo'),
+('EDU121', 'ChÃ¡vez Huerta', 'Gael Rodrigo'),
 ('EDU122', 'Esquivel Melgar', 'Zoe Daniela'),
-('EDU123', 'Manrique Paucar', 'Tomás Elías');
+('EDU123', 'Manrique Paucar', 'TomÃ¡s ElÃ­as');
 
 INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (114, 11),
@@ -509,6 +509,66 @@ INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
 (121, 11),
 (122, 11),
 (123, 11);
+
+USE DB_EDUCA
+GO
+
+-- Insertar mÃ¡s docentes
+INSERT INTO Usuario (Username, Password, Rol) VALUES
+('lgarcia', 'LuisG2025@', 'Docente'),
+('cmartinez', 'CarlosM2025@', 'Docente'),
+('aperez', 'AnaP2025@', 'Docente');
+
+INSERT INTO Docente (dni, nombres, apellidos, correo, celular, direccion, profesion, grado_academico, foto, id_usuario)
+VALUES
+('78901234', 'Luis Alberto', 'GarcÃ­a Mendoza', 'luis.garcia@example.com', '921098765', 'Av. Universitaria 404', 'Ingeniero de Datos', 'MaestrÃ­a en Big Data', NULL, 8),
+('89012345', 'Carlos Enrique', 'MartÃ­nez Silva', 'carlos.martinez@example.com', '910987654', 'Calle TecnologÃ­a 505', 'Especialista en IA', 'Doctorado en IA', NULL, 9),
+('90123456', 'Ana Patricia', 'PÃ©rez Rojas', 'ana.perez@example.com', '909876543', 'Jr. InnovaciÃ³n 606', 'Desarrolladora Full Stack', 'MaestrÃ­a en Software', NULL, 10);
+
+-- Insertar mÃ¡s cursos
+INSERT INTO Curso (nombre_curso, imagen_url, duracion_horas, nivel, certificacion, precio) VALUES
+('Python Avanzado', 'https://www.python.org/static/community_logos/python-logo-master-v3-TM.png', 90, 'Avanzado', 1, 310.00),
+('React Native', 'https://reactnative.dev/img/header_logo.svg', 75, 'Intermedio', 1, 270.00),
+('DevOps Fundamentals', 'https://miro.medium.com/max/1400/1*OlTmKBHN_6Pu3jqJKxXfYw.png', 85, 'Intermedio', 1, 295.00);
+
+-- Insertar asignaciones sin estudiantes (para poder eliminar)
+INSERT INTO AsignacionCurso (id_docente, id_curso, id_seccion, id_turno, fecha_inicio, fecha_fin) VALUES
+(5, 12, 1, 1, '2025-04-01', '2025-07-30'),
+(6, 13, 2, 2, '2025-04-01', '2025-07-30'),
+(1, 14, 3, 3, '2025-04-01', '2025-07-30');
+
+-- Insertar mÃ¡s estudiantes
+INSERT INTO Estudiante (codigo_estudiante, apellidos, nombres) VALUES
+('EDU124', 'RamÃ­rez Soto', 'AndrÃ©s Felipe'),
+('EDU125', 'GutiÃ©rrez Luna', 'SofÃ­a Valentina'),
+('EDU126', 'Herrera Castro', 'Mateo SebastiÃ¡n'),
+('EDU127', 'Vargas DÃ­az', 'Isabella LucÃ­a'),
+('EDU128', 'Moreno RÃ­os', 'NicolÃ¡s Alejandro');
+
+-- Insertar matrÃ­culas adicionales
+INSERT INTO Matricula (id_estudiante, id_asignacion) VALUES
+(124, 1),
+(125, 1),
+(126, 2),
+(127, 2),
+(128, 3);
+
+-- Insertar asistencias de docentes
+INSERT INTO AsistenciaDocente (id_asignacion, fecha, hora, estado_asistencia) VALUES
+(6, '2025-01-20', '08:00:00', 'Asistio'),
+(7, '2025-01-20', '14:00:00', 'Asistio'),
+(8, '2025-01-20', '19:00:00', 'Tardanza'),
+(9, '2025-01-21', '08:00:00', 'Asistio'),
+(10, '2025-01-21', '14:00:00', 'Falto');
+
+-- Insertar notas para algunos estudiantes
+INSERT INTO Notas (id_matricula, nota_T1, nota_T2, nota_EF) VALUES
+(1, 15.5, 16.0, 17.0),
+(2, 14.0, 13.5, 15.0),
+(3, 18.0, 17.5, 19.0),
+(4, 12.0, 11.5, 13.0),
+(5, 16.5, 17.0, 18.5);
+
 
 CREATE OR ALTER PROCEDURE sp_ReporteAsistenciaDocente
     @id_docente INT = NULL,
@@ -546,7 +606,7 @@ GO
 -- Listar todos los reportes
 EXEC sp_ReporteAsistenciaDocente;
 
--- Filtrar por docente específico
+-- Filtrar por docente especÃ­fico
 EXEC sp_ReporteAsistenciaDocente @id_docente = 1;
 
 -- Filtrar por curso y turno
@@ -570,7 +630,7 @@ SELECT * FROM AsistenciaDocente;
 -- Ejecutar el procedimiento para ver los resultados
 EXEC sp_ReporteAsistenciaDocente;
 
--- Procedimiento almacenado actualizado con parámetros de filtro
+-- Procedimiento almacenado actualizado con parÃ¡metros de filtro
 CREATE OR ALTER PROCEDURE sp_ReporteAsistenciaDocente
     @id_docente INT = NULL,
     @id_curso INT = NULL,
@@ -613,3 +673,49 @@ EXEC sp_ReporteAsistenciaDocente @id_docente = 1;
 
 -- Con filtro de curso
 EXEC sp_ReporteAsistenciaDocente @id_curso = 1;
+
+-- Procedimiento almacenado para eliminar curso con todas sus relacione
+
+CREATE OR ALTER PROCEDURE sp_EliminarCursos
+    @id_curso INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @cantidadMatriculados INT;
+    
+    SELECT @cantidadMatriculados = COUNT(*)
+    FROM Matricula M
+    INNER JOIN AsignacionCurso AC ON M.id_asignacion = AC.id_asignacion
+    WHERE AC.id_curso = @id_curso;
+    
+    IF @cantidadMatriculados > 0
+    BEGIN
+        RAISERROR('No se puede eliminar el curso porque tiene estudiantes matriculados.', 16, 1);
+        RETURN;
+    END
+    
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        DELETE FROM AsignacionCurso WHERE id_curso = @id_curso;
+        DELETE FROM Curso WHERE id_curso = @id_curso;
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+-- Probar el procedimiento con DevOps (id_curso = 14)
+EXEC sp_EliminarCursos @id_curso = 1004;
+
+select * from Curso
+go
+
+
+
+SELECT * FROM sys.procedures WHERE name = 'sp_EliminarCursos';
+
+SELECT name FROM sys.procedures WHERE name LIKE '%Eliminar%'
