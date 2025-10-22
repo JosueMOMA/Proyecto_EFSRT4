@@ -13,6 +13,9 @@ using System.IO;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
+using OfficeOpenXml;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 
 namespace EducaEFRT.Controllers
 {
@@ -326,8 +329,16 @@ namespace EducaEFRT.Controllers
                 var docente = db.Docentes.Find(id);
                 if (docente != null)
                 {
+                    var tieneCursosAsignados = db.AsignacionesCurso.Any(a => a.IdDocente == id);
+                    if (tieneCursosAsignados)
+                    {
+                        TempData["ErrorMessage"] = "No se puede eliminar el docente porque tiene cursos asignados.";
+                        return RedirectToAction("GestionDocente");
+                    }
+
                     db.Docentes.Remove(docente);
                     db.SaveChanges();
+                    TempData["SuccessMessage"] = "Docente eliminado correctamente.";
                 }
             }
             return RedirectToAction("GestionDocente");
@@ -702,20 +713,74 @@ namespace EducaEFRT.Controllers
                 if (asignacion != null)
                 {
                     int idDocente = asignacion.IdDocente;
-                    int idCurso = asignacion.IdCurso;
                     
-                    // Eliminar TODAS las asignaciones de este curso
-                    var todasAsignaciones = db.AsignacionesCurso.Where(a => a.IdCurso == idCurso).ToList();
-                    db.AsignacionesCurso.RemoveRange(todasAsignaciones);
+                    // Verificar si hay estudiantes matriculados
+                    var tieneEstudiantes = db.Matriculas.Any(m => m.IdAsignacion == id);
+                    if (tieneEstudiantes)
+                    {
+                        TempData["ErrorMessage"] = "No se puede eliminar la asignación porque tiene estudiantes matriculados.";
+                        return RedirectToAction("EditarDocente", new { id = idDocente });
+                    }
+                    
+                    // Eliminar asistencias del docente
+                    var asistencias = db.AsistenciasDocente.Where(a => a.IdAsignacion == id).ToList();
+                    db.AsistenciasDocente.RemoveRange(asistencias);
+                    
+                    // Eliminar la asignación
+                    db.AsignacionesCurso.Remove(asignacion);
                     db.SaveChanges();
                     
-                    System.Diagnostics.Debug.WriteLine($"Eliminadas {todasAsignaciones.Count} asignaciones del curso {idCurso}");
-                    TempData["SuccessMessage"] = $"Eliminadas todas las asignaciones del curso ({todasAsignaciones.Count} asignaciones).";
+                    TempData["SuccessMessage"] = "Asignación eliminada correctamente.";
                     return RedirectToAction("EditarDocente", new { id = idDocente });
                 }
             }
             
             return RedirectToAction("GestionDocente");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EliminarCursoDirecto(int id)
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Account");
+
+            using (var db = new EduControlDB())
+            {
+                try
+                {
+                    db.Database.ExecuteSqlCommand("EXEC sp_EliminarCursos @id_curso", 
+                        new SqlParameter("@id_curso", id));
+                    TempData["SuccessMessage"] = "Curso eliminado correctamente.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Error al eliminar: " + ex.Message;
+                }
+            }
+            
+            using (var db = new EduControlDB())
+            {
+                var cursos = (from c in db.Cursos
+                             join a in db.AsignacionesCurso on c.IdCurso equals a.IdCurso into asignaciones
+                             from asig in asignaciones.DefaultIfEmpty()
+                             select new CursoGestionViewModel
+                             {
+                                 IdCurso = c.IdCurso,
+                                 IdAsignacion = asig != null ? asig.IdAsignacion : 0,
+                                 NombreCurso = c.NombreCurso,
+                                 ImagenUrl = c.ImagenUrl,
+                                 NombreSeccion = asig != null ? asig.Seccion.NombreSeccion : "Sin asignar",
+                                 NombreTurno = asig != null ? asig.Turno.NombreTurno : "Sin asignar",
+                                 NombreDocente = asig != null ? asig.Docente.Nombres + " " + asig.Docente.Apellidos : "Sin asignar",
+                                 FechaInicio = asig != null ? asig.FechaInicio : DateTime.MinValue,
+                                 FechaFin = asig != null ? asig.FechaFin : DateTime.MinValue,
+                                 CantidadMatriculados = asig != null ? db.Matriculas.Count(m => m.IdAsignacion == asig.IdAsignacion) : 0
+                             })
+                             .ToList();
+
+                return View("~/Views/Admin/GestionCurso/IndexCurso.cshtml", cursos);
+            }
         }
 
         // ==================== REPORTES ====================
@@ -786,6 +851,115 @@ namespace EducaEFRT.Controllers
                     System.Diagnostics.Debug.WriteLine($"Error completo: {ex.ToString()}");
                     ViewBag.Error = ex.Message;
                     return View("~/Views/Admin/Reportes/Reportes.cshtml", new List<ReporteAsistenciaViewModel>());
+                }
+            }
+        }
+
+        public ActionResult ExportarPDF(int? docente = null, int? curso = null, int? seccion = null, int? turno = null)
+        {
+            using (var db = new EduControlDB())
+            {
+                var reportes = db.Database.SqlQuery<ReporteAsistenciaViewModel>(
+                    "EXEC sp_ReporteAsistenciaDocente @id_docente, @id_curso, @id_seccion, @id_turno",
+                    new SqlParameter("@id_docente", (object)docente ?? DBNull.Value),
+                    new SqlParameter("@id_curso", (object)curso ?? DBNull.Value),
+                    new SqlParameter("@id_seccion", (object)seccion ?? DBNull.Value),
+                    new SqlParameter("@id_turno", (object)turno ?? DBNull.Value)
+                ).ToList();
+
+                var doc = new Document(PageSize.A4.Rotate());
+                var stream = new MemoryStream();
+                PdfWriter.GetInstance(doc, stream);
+                doc.Open();
+
+                var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
+                var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
+                var normalFont = FontFactory.GetFont(FontFactory.HELVETICA, 9);
+
+                doc.Add(new Paragraph("REPORTE DE ASISTENCIA DOCENTE", titleFont) { Alignment = Element.ALIGN_CENTER, SpacingAfter = 20 });
+
+                var table = new PdfPTable(8) { WidthPercentage = 100 };
+                table.SetWidths(new float[] { 3f, 3f, 2f, 2f, 1.5f, 1.5f, 1.5f, 1.5f });
+
+                table.AddCell(new PdfPCell(new Phrase("Docente", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+                table.AddCell(new PdfPCell(new Phrase("Curso", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+                table.AddCell(new PdfPCell(new Phrase("Sección", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+                table.AddCell(new PdfPCell(new Phrase("Turno", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+                table.AddCell(new PdfPCell(new Phrase("Total", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+                table.AddCell(new PdfPCell(new Phrase("Asistencias", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+                table.AddCell(new PdfPCell(new Phrase("Inasistencias", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+                table.AddCell(new PdfPCell(new Phrase("Tardanzas", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
+
+                foreach (var item in reportes)
+                {
+                    table.AddCell(new PdfPCell(new Phrase(item.Docente, normalFont)));
+                    table.AddCell(new PdfPCell(new Phrase(item.Curso, normalFont)));
+                    table.AddCell(new PdfPCell(new Phrase(item.Seccion, normalFont)));
+                    table.AddCell(new PdfPCell(new Phrase(item.Turno, normalFont)));
+                    table.AddCell(new PdfPCell(new Phrase(item.TotalClases.ToString(), normalFont)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                    table.AddCell(new PdfPCell(new Phrase(item.Asistencias.ToString(), normalFont)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                    table.AddCell(new PdfPCell(new Phrase(item.Inasistencias.ToString(), normalFont)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                    table.AddCell(new PdfPCell(new Phrase(item.Tardanzas.ToString(), normalFont)) { HorizontalAlignment = Element.ALIGN_CENTER });
+                }
+
+                doc.Add(table);
+                doc.Close();
+
+                return File(stream.ToArray(), "application/pdf", "ReporteAsistencia.pdf");
+            }
+        }
+
+        public ActionResult ExportarExcel(int? docente = null, int? curso = null, int? seccion = null, int? turno = null)
+        {
+            using (var db = new EduControlDB())
+            {
+                var reportes = db.Database.SqlQuery<ReporteAsistenciaViewModel>(
+                    "EXEC sp_ReporteAsistenciaDocente @id_docente, @id_curso, @id_seccion, @id_turno",
+                    new SqlParameter("@id_docente", (object)docente ?? DBNull.Value),
+                    new SqlParameter("@id_curso", (object)curso ?? DBNull.Value),
+                    new SqlParameter("@id_seccion", (object)seccion ?? DBNull.Value),
+                    new SqlParameter("@id_turno", (object)turno ?? DBNull.Value)
+                ).ToList();
+
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("Reporte Asistencia");
+
+                    worksheet.Cells[1, 1].Value = "Docente";
+                    worksheet.Cells[1, 2].Value = "Curso";
+                    worksheet.Cells[1, 3].Value = "Sección";
+                    worksheet.Cells[1, 4].Value = "Turno";
+                    worksheet.Cells[1, 5].Value = "Total Clases";
+                    worksheet.Cells[1, 6].Value = "Asistencias";
+                    worksheet.Cells[1, 7].Value = "Inasistencias";
+                    worksheet.Cells[1, 8].Value = "Tardanzas";
+
+                    using (var range = worksheet.Cells[1, 1, 1, 8])
+                    {
+                        range.Style.Font.Bold = true;
+                        range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                    }
+
+                    int row = 2;
+                    foreach (var item in reportes)
+                    {
+                        worksheet.Cells[row, 1].Value = item.Docente;
+                        worksheet.Cells[row, 2].Value = item.Curso;
+                        worksheet.Cells[row, 3].Value = item.Seccion;
+                        worksheet.Cells[row, 4].Value = item.Turno;
+                        worksheet.Cells[row, 5].Value = item.TotalClases;
+                        worksheet.Cells[row, 6].Value = item.Asistencias;
+                        worksheet.Cells[row, 7].Value = item.Inasistencias;
+                        worksheet.Cells[row, 8].Value = item.Tardanzas;
+                        row++;
+                    }
+
+                    worksheet.Cells.AutoFitColumns();
+
+                    var stream = new MemoryStream(package.GetAsByteArray());
+                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteAsistencia.xlsx");
                 }
             }
         }
