@@ -68,6 +68,20 @@
             </div>
         </header>
 
+        <!-- Mensajes -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
         <!-- Contenido Principal -->
         <main class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
             @using (Html.BeginForm("EditarDocente", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
@@ -347,7 +361,7 @@
                         select.innerHTML += `<option value="${curso.IdCurso}">${curso.NombreCurso}</option>`;
                     });
                 });
-            
+
             document.getElementById('addModal').classList.remove('hidden');
             document.getElementById('addModal').classList.add('flex');
         }
@@ -359,7 +373,7 @@
             document.getElementById('editIdAsignacion').value = id;
             document.getElementById('editCurso').value = curso;
             document.getElementById('editSeccion').value = seccion;
-            
+
             // Seleccionar el turno correcto en el dropdown
             const turnoSelect = document.getElementById('editTurno');
             if (turno === 'Mañana') {
@@ -369,7 +383,7 @@
             } else if (turno === 'Noche') {
                 turnoSelect.value = '3';
             }
-            
+
             document.getElementById('editFechaInicio').value = inicio;
             document.getElementById('editFechaFin').value = fin;
             document.getElementById('editModal').classList.remove('hidden');
