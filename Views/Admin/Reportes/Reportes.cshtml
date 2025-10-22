@@ -1,8 +1,42 @@
 @model IEnumerable<EducaEFRT.Models.ViewModels.ReporteAsistenciaViewModel>
+@using System.Web
 
 @{
     ViewData["Title"] = "Reportes de Asistencia";
     Layout = null;
+
+    // --- Calcular totales en C# (evita bucles Razor dentro de <script>)
+    var totalAsistencias = 0;
+    var totalInasistencias = 0;
+    var totalTardanzas = 0;
+
+    if (Model != null)
+    {
+        foreach (var itm in Model)
+        {
+            totalAsistencias += itm.Asistencias;
+            totalInasistencias += itm.Inasistencias;
+            totalTardanzas += itm.Tardanzas;
+        }
+    }
+
+    // --- Construir HTML de filtros aplicados en C# (evita foreach dentro de @if en markup)
+    string filtrosHtml = string.Empty;
+    if (Request.QueryString.Count > 0)
+    {
+        var parts = new List<string>();
+        foreach (string key in Request.QueryString.AllKeys)
+        {
+            parts.Add(HttpUtility.HtmlEncode(key) + " = " + HttpUtility.HtmlEncode(Request.QueryString[key]));
+        }
+
+        var sb = new System.Text.StringBuilder();
+        foreach (var p in parts)
+        {
+            sb.Append("<span class=\"ml-2\">" + p + "</span>");
+        }
+        filtrosHtml = sb.ToString();
+    }
 }
 
 <!DOCTYPE html>
@@ -118,6 +152,7 @@
                         }
                     </select>
                 </div>
+
                 <div class="flex flex-col">
                     <label for="curso" class="text-sm font-medium text-text-secondary mb-1">Curso</label>
                     <select id="curso" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-40">
@@ -131,6 +166,7 @@
                         }
                     </select>
                 </div>
+
                 <div class="flex flex-col">
                     <label for="seccion" class="text-sm font-medium text-text-secondary mb-1">Sección</label>
                     <select id="seccion" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-40">
@@ -144,6 +180,7 @@
                         }
                     </select>
                 </div>
+
                 <div class="flex flex-col">
                     <label for="turno" class="text-sm font-medium text-text-secondary mb-1">Turno</label>
                     <select id="turno" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-40">
@@ -157,6 +194,7 @@
                         }
                     </select>
                 </div>
+
                 <button onclick="generarReporte()" class="bg-gradient-button hover:bg-gradient-button-hover text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-300">
                     Generar Reporte
                 </button>
@@ -165,7 +203,7 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- Debug Info -->
         @if (ViewBag.Error != null)
         {
@@ -173,19 +211,12 @@
                 <strong>Error:</strong> @ViewBag.Error
             </div>
         }
-        
-        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
-            <strong>Debug:</strong> Mostrando @(Model?.Count() ?? 0) registros
-            @if (Request.QueryString.Count > 0)
-            {
-                <br><strong>Filtros aplicados:</strong>
-                @foreach (string key in Request.QueryString.AllKeys)
-                {
-                    <span class="ml-2">@key = @Request.QueryString[key]</span>
-                }
-            }
+
+        <div class="bg-blue-100 border text-center border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
+            <strong>Mostrando @(Model?.Count() ?? 0) registros</strong>
+            
         </div>
-        
+
         <!-- Table Results Section -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-6">
             <div class="overflow-x-auto">
@@ -244,118 +275,43 @@
 
         <!-- Chart Section -->
         <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
-            <h2 class="text-xl font-semibold text-text-secondary mt-0 mb-6 border-l-4 border-primary pl-4">
-                Estadísticas de Asistencia
-            </h2>
+            <h2 class="text-xl font-semibold text-text-secondary mt-0 mb-6 border-l-4 border-primary pl-4">Estadísticas de Asistencia</h2>
             <div class="flex flex-col items-center justify-center gap-6">
                 <div class="flex gap-6 justify-center text-sm text-text-main font-medium">
-                    <div class="flex items-center">
-                        <span class="chart-legend-box bg-primary"></span> Asistió
-                    </div>
-                    <div class="flex items-center">
-                        <span class="chart-legend-box bg-red-500"></span> Faltó
-                    </div>
-                    <div class="flex items-center">
-                        <span class="chart-legend-box bg-yellow-500"></span> Tardanza
-                    </div>
+                    <div class="flex items-center"><span class="chart-legend-box bg-primary"></span> Asistió</div>
+                    <div class="flex items-center"><span class="chart-legend-box bg-red-500"></span> Faltó</div>
+                    <div class="flex items-center"><span class="chart-legend-box bg-yellow-500"></span> Tardanza</div>
                 </div>
-                <div id="pieChartContainer">
-                    <canvas id="attendanceChart"></canvas>
-                </div>
+                <div id="pieChartContainer"><canvas id="attendanceChart"></canvas></div>
             </div>
         </div>
 
         <!-- Export Buttons -->
         <div class="flex justify-center gap-4">
-            <button class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
-                Exportar PDF
-            </button>
-            <button class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2.5 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
-                Exportar Excel
-            </button>
+            <button onclick="exportarPDF()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">Exportar PDF</button>
+            <button onclick="exportarExcel()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2.5 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">Exportar Excel</button>
         </div>
     </div>
 
     <script>
-        function generarReporte() {
-            const docente = document.getElementById('docente').value;
-            const curso = document.getElementById('curso').value;
-            const seccion = document.getElementById('seccion').value;
-            const turno = document.getElementById('turno').value;
-            
-            console.log('=== VALORES SELECCIONADOS ===');
-            console.log('docente:', docente);
-            console.log('curso:', curso);
-            console.log('seccion:', seccion);
-            console.log('turno:', turno);
-            
-            let url = '@Url.Action("Reportes", "Admin")';
-            let params = [];
-            
-            if (docente) params.push('docente=' + docente);
-            if (curso) params.push('curso=' + curso);
-            if (seccion) params.push('seccion=' + seccion);
-            if (turno) params.push('turno=' + turno);
-            
-            if (params.length > 0) {
-                url += '?' + params.join('&');
-            }
-            
-            console.log('URL final:', url);
-            window.location.href = url;
-        }
-        
-        function limpiarFiltros() {
-            window.location.href = '@Url.Action("Reportes", "Admin")';
-        }
-        
-        // Mantener valores seleccionados después del filtrado
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            if (urlParams.get('docente')) {
-                document.getElementById('docente').value = urlParams.get('docente');
-            }
-            if (urlParams.get('curso')) {
-                document.getElementById('curso').value = urlParams.get('curso');
-            }
-            if (urlParams.get('seccion')) {
-                document.getElementById('seccion').value = urlParams.get('seccion');
-            }
-            if (urlParams.get('turno')) {
-                document.getElementById('turno').value = urlParams.get('turno');
-            }
-        });
-        
-        // Calcular totales de la tabla
-        let totalAsistencias = 0;
-        let totalInasistencias = 0;
-        let totalTardanzas = 0;
-        
-        @if (Model != null && Model.Any())
-        {
-            foreach (var item in Model)
-            {
-                <text>
-                totalAsistencias += @item.Asistencias;
-                totalInasistencias += @item.Inasistencias;
-                totalTardanzas += @item.Tardanzas;
-                </text>
-            }
-        }
-        
+        // Totales pasados desde C# a JavaScript (seguro y sin bucles Razor dentro del <script>)
+        const totalAsistencias = @totalAsistencias;
+        const totalInasistencias = @totalInasistencias;
+        const totalTardanzas = @totalTardanzas;
+
+        // Evitar NaN si algo raro sucede
+        const a = Number.isFinite(totalAsistencias) ? totalAsistencias : 0;
+        const b = Number.isFinite(totalInasistencias) ? totalInasistencias : 0;
+        const c = Number.isFinite(totalTardanzas) ? totalTardanzas : 0;
+
         const ctx = document.getElementById('attendanceChart').getContext('2d');
-        const attendanceChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: ['Asistió', 'Faltó', 'Tardanza'],
                 datasets: [{
-                    data: [totalAsistencias, totalInasistencias, totalTardanzas],
-                    backgroundColor: [
-                        '#4361ee',
-                        '#ef4444',
-                        '#eab308'
-                    ],
+                    data: [a, b, c],
+                    backgroundColor: ['#4361ee', '#ef4444', '#eab308'],
                     borderWidth: 2,
                     borderColor: '#fff'
                 }]
@@ -363,13 +319,64 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
+                plugins: { legend: { display: true, position: 'bottom' } }
             }
         });
+
+        function generarReporte() {
+            const docente = document.getElementById('docente').value;
+            const curso = document.getElementById('curso').value;
+            const seccion = document.getElementById('seccion').value;
+            const turno = document.getElementById('turno').value;
+
+            let url = '@Url.Action("Reportes", "Admin")';
+            let params = [];
+            if (docente) params.push('docente=' + encodeURIComponent(docente));
+            if (curso) params.push('curso=' + encodeURIComponent(curso));
+            if (seccion) params.push('seccion=' + encodeURIComponent(seccion));
+            if (turno) params.push('turno=' + encodeURIComponent(turno));
+
+            if (params.length > 0) url += '?' + params.join('&');
+            window.location.href = url;
+        }
+
+        function limpiarFiltros() {
+            window.location.href = '@Url.Action("Reportes", "Admin")';
+        }
+
+        function exportarPDF() {
+            const docente = document.getElementById('docente').value;
+            const curso = document.getElementById('curso').value;
+            const seccion = document.getElementById('seccion').value;
+            const turno = document.getElementById('turno').value;
+
+            let url = '@Url.Action("ExportarPDF", "Admin")';
+            let params = [];
+            if (docente) params.push('docente=' + encodeURIComponent(docente));
+            if (curso) params.push('curso=' + encodeURIComponent(curso));
+            if (seccion) params.push('seccion=' + encodeURIComponent(seccion));
+            if (turno) params.push('turno=' + encodeURIComponent(turno));
+
+            if (params.length > 0) url += '?' + params.join('&');
+            window.location.href = url;
+        }
+
+        function exportarExcel() {
+            const docente = document.getElementById('docente').value;
+            const curso = document.getElementById('curso').value;
+            const seccion = document.getElementById('seccion').value;
+            const turno = document.getElementById('turno').value;
+
+            let url = '@Url.Action("ExportarExcel", "Admin")';
+            let params = [];
+            if (docente) params.push('docente=' + encodeURIComponent(docente));
+            if (curso) params.push('curso=' + encodeURIComponent(curso));
+            if (seccion) params.push('seccion=' + encodeURIComponent(seccion));
+            if (turno) params.push('turno=' + encodeURIComponent(turno));
+
+            if (params.length > 0) url += '?' + params.join('&');
+            window.location.href = url;
+        }
     </script>
 
 </body>
