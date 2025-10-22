@@ -182,15 +182,33 @@
                                             <td class="px-6 py-3">@item.FechaInicio.ToString("dd/MM/yyyy")</td>
                                             <td class="px-6 py-3">@item.FechaFin.ToString("dd/MM/yyyy")</td>
                                             <td class="px-6 py-3 text-center flex justify-center gap-3">
+                                                @{
+                                                    var asignacionesConEstudiantes = ViewBag.AsignacionesConEstudiantes as List<int> ?? new List<int>();
+                                                    var tieneEstudiantes = asignacionesConEstudiantes.Contains(item.IdAsignacion);
+                                                }
                                                 <button type="button" class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md text-xs"
                                                         onclick="openEditModal(@item.IdAsignacion, '@item.CursoNombre', '@item.SeccionNombre', '@item.TurnoNombre', '@item.FechaInicio.ToString("yyyy-MM-dd")', '@item.FechaFin.ToString("yyyy-MM-dd")')">
                                                     Editar
                                                 </button>
-                                                <a href="@Url.Action("EliminarAsignacion", "Admin", new { id = item.IdAsignacion })"
-                                                   class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs"
-                                                   onclick="return confirm('¿Seguro que desea eliminar esta asignación?');">
-                                                    Eliminar
-                                                </a>
+                                                @if (!tieneEstudiantes)
+                                                {
+                                                    <form method="post" action="@Url.Action("EliminarAsignacion", "Admin")" style="display:inline;">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.IdAsignacion" />
+                                                        <input type="hidden" name="idDocente" value="@Model.Docente.IdDocente" />
+                                                        <button type="submit" onclick="return confirm('¿Seguro que desea eliminar esta asignación?');"
+                                                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" disabled title="No se puede eliminar porque tiene estudiantes matriculados"
+                                                            class="bg-gray-400 cursor-not-allowed text-white px-3 py-1 rounded-md text-xs">
+                                                        Eliminar
+                                                    </button>
+                                                }
                                             </td>
                                         </tr>
                                     }

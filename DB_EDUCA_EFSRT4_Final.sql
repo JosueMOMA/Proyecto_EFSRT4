@@ -719,3 +719,254 @@ go
 SELECT * FROM sys.procedures WHERE name = 'sp_EliminarCursos';
 
 SELECT name FROM sys.procedures WHERE name LIKE '%Eliminar%'
+
+-- Procedimiento almacenado para eliminar docente con todas sus relaciones
+CREATE OR ALTER PROCEDURE sp_EliminarDocente
+    @id_docente INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @cantidadAsignaciones INT;
+    DECLARE @id_usuario INT;
+    
+    -- Verificar si el docente tiene asignaciones con estudiantes matriculados
+    SELECT @cantidadAsignaciones = COUNT(*)
+    FROM Matricula M
+    INNER JOIN AsignacionCurso AC ON M.id_asignacion = AC.id_asignacion
+    WHERE AC.id_docente = @id_docente;
+    
+    IF @cantidadAsignaciones > 0
+    BEGIN
+        RAISERROR('No se puede eliminar el docente porque tiene estudiantes matriculados en sus cursos.', 16, 1);
+        RETURN;
+    END
+    
+    -- Obtener el id_usuario del docente
+    SELECT @id_usuario = id_usuario FROM Docente WHERE id_docente = @id_docente;
+    
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        -- Eliminar asistencias del docente
+        DELETE FROM AsistenciaDocente 
+        WHERE id_asignacion IN (SELECT id_asignacion FROM AsignacionCurso WHERE id_docente = @id_docente);
+        
+        -- Eliminar asignaciones del docente
+        DELETE FROM AsignacionCurso WHERE id_docente = @id_docente;
+        
+        -- Eliminar el docente
+        DELETE FROM Docente WHERE id_docente = @id_docente;
+        
+        -- Eliminar el usuario asociado
+        IF @id_usuario IS NOT NULL
+        BEGIN
+            DELETE FROM Usuario WHERE id_usuario = @id_usuario;
+        END
+        
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+-- ============================================
+-- SCRIPT DE PRUEBAS PARA ELIMINAR DOCENTE
+-- ============================================
+
+-- 1. Ver todos los docentes y sus asignaciones
+SELECT 
+    d.id_docente,
+    CONCAT(d.nombres, ' ', d.apellidos) AS Docente,
+    COUNT(DISTINCT ac.id_asignacion) AS TotalAsignaciones,
+    COUNT(m.id_matricula) AS EstudiantesMatriculados
+FROM Docente d
+LEFT JOIN AsignacionCurso ac ON d.id_docente = ac.id_docente
+LEFT JOIN Matricula m ON ac.id_asignacion = m.id_asignacion
+GROUP BY d.id_docente, d.nombres, d.apellidos
+ORDER BY d.id_docente;
+
+-- 2. Identificar docentes que SÍ se pueden eliminar (sin estudiantes matriculados)
+SELECT 
+    d.id_docente,
+    CONCAT(d.nombres, ' ', d.apellidos) AS Docente,
+    'SE PUEDE ELIMINAR' AS Estado
+FROM Docente d
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM AsignacionCurso ac
+    INNER JOIN Matricula m ON ac.id_asignacion = m.id_asignacion
+    WHERE ac.id_docente = d.id_docente
+);
+
+-- 3. Identificar docentes que NO se pueden eliminar (tienen estudiantes)
+SELECT 
+    d.id_docente,
+    CONCAT(d.nombres, ' ', d.apellidos) AS Docente,
+    COUNT(m.id_matricula) AS EstudiantesMatriculados,
+    'NO SE PUEDE ELIMINAR' AS Estado
+FROM Docente d
+INNER JOIN AsignacionCurso ac ON d.id_docente = ac.id_docente
+INNER JOIN Matricula m ON ac.id_asignacion = m.id_asignacion
+GROUP BY d.id_docente, d.nombres, d.apellidos;
+
+-- ============================================
+-- PRUEBA 1: Intentar eliminar docente CON estudiantes (debe fallar)
+-- ============================================
+PRINT '=== PRUEBA 1: Intentar eliminar docente con estudiantes ==='
+BEGIN TRY
+    EXEC sp_EliminarDocente @id_docente = 1; -- Abraham Jara tiene estudiantes
+    PRINT 'ERROR: No debería haber eliminado el docente'
+END TRY
+BEGIN CATCH
+    PRINT 'CORRECTO: ' + ERROR_MESSAGE();
+END CATCH
+GO
+
+-- ============================================
+-- PRUEBA 2: Crear un docente de prueba y eliminarlo
+-- ============================================
+PRINT '=== PRUEBA 2: Crear y eliminar docente de prueba ==='
+
+-- Crear usuario de prueba
+delete from Usuario
+where id_usuario in (1002,1004,1009,1011)
+go
+
+select * 
+from Usuario
+go;
+
+INSERT INTO Usuario (Username, Password, Rol) 
+VALUES ('docente_prueba', 'Test123@', 'Docente');
+
+
+DECLARE @id_usuario_prueba INT = SCOPE_IDENTITY();
+
+PRINT 'usuario de prueba creado con ID: ' + CAST(@id_usuario_prueba AS VARCHAR);
+
+-- Crear docente de prueba
+INSERT INTO Docente (dni, nombres, apellidos, correo, celular, direccion, profesion, grado_academico, foto, id_usuario)
+VALUES ('99999999', 'Docente', 'De Prueba', 'prueba@test.com', '999999999', 'Calle Test', 'Profesor', 'Licenciado', NULL, 1014);
+
+DECLARE @id_docente_prueba INT = SCOPE_IDENTITY();
+
+PRINT 'Docente de prueba creado con ID: ' + CAST(@id_docente_prueba AS VARCHAR);
+
+-- Verificar que existe
+SELECT * FROM Docente WHERE id_docente = 1014;
+SELECT * FROM Usuario WHERE id_usuario = 1014;
+
+-- Eliminar el docente de prueba
+EXEC sp_EliminarDocente @id_docente = 1004;
+
+-- Verificar que se eliminó
+IF NOT EXISTS (SELECT 1 FROM Docente WHERE id_docente = 1004)
+    PRINT 'CORRECTO: Docente eliminado exitosamente'
+ELSE
+    PRINT 'ERROR: El docente no se eliminó'
+
+IF NOT EXISTS (SELECT 1 FROM Usuario WHERE id_usuario = 1004)
+    PRINT 'CORRECTO: Usuario eliminado exitosamente'
+ELSE
+    PRINT 'ERROR: El usuario no se eliminó'
+GO
+
+-- ============================================
+-- PRUEBA 3: Crear docente con asignación SIN estudiantes y eliminarlo
+-- ============================================
+PRINT '=== PRUEBA 3: Eliminar docente con asignación pero sin estudiantes ==='
+
+-- Crear usuario
+INSERT INTO Usuario (Username, Password, Rol) 
+VALUES ('docente_prueba2', 'Test123@', 'Docente');
+
+select * from Usuario
+go;
+
+DECLARE @id_usuario_prueba2 INT = SCOPE_IDENTITY();
+
+-- Crear docente
+INSERT INTO Docente (dni, nombres, apellidos, correo, celular, direccion, profesion, grado_academico, foto, id_usuario)
+VALUES ('88888888', 'Docente2', 'De Prueba', 'prueba2@test.com', '888888888', 'Calle Test', 'Profesor', 'Licenciado', NULL, 1015);
+
+DECLARE @id_docente_prueba2 INT = SCOPE_IDENTITY();
+
+-- Crear asignación sin estudiantes
+INSERT INTO AsignacionCurso (id_docente, id_curso, id_seccion, id_turno, fecha_inicio, fecha_fin)
+VALUES (@id_docente_prueba2, 1, 1, 1, '2025-05-01', '2025-08-30');
+
+DECLARE @id_asignacion_prueba INT = SCOPE_IDENTITY();
+
+-- Crear asistencia del docente
+INSERT INTO AsistenciaDocente (id_asignacion, fecha, hora, estado_asistencia)
+VALUES (@id_asignacion_prueba, '2025-01-20', '08:00:00', 'Asistio');
+
+PRINT 'Docente con asignación creado con ID: ' + CAST(@id_docente_prueba2 AS VARCHAR);
+
+-- Eliminar el docente (debe funcionar porque no tiene estudiantes)
+EXEC sp_EliminarDocente @id_docente = @id_docente_prueba2;
+
+-- Verificar que se eliminó todo
+IF NOT EXISTS (SELECT 1 FROM Docente WHERE id_docente = @id_docente_prueba2)
+    PRINT 'CORRECTO: Docente eliminado'
+ELSE
+    PRINT 'ERROR: Docente no eliminado'
+
+IF NOT EXISTS (SELECT 1 FROM AsignacionCurso WHERE id_asignacion = @id_asignacion_prueba)
+    PRINT 'CORRECTO: Asignación eliminada'
+ELSE
+    PRINT 'ERROR: Asignación no eliminada'
+
+IF NOT EXISTS (SELECT 1 FROM AsistenciaDocente WHERE id_asignacion = @id_asignacion_prueba)
+    PRINT 'CORRECTO: Asistencias eliminadas'
+ELSE
+    PRINT 'ERROR: Asistencias no eliminadas'
+
+IF NOT EXISTS (SELECT 1 FROM Usuario WHERE id_usuario = @id_usuario_prueba2)
+    PRINT 'CORRECTO: Usuario eliminado'
+ELSE
+    PRINT 'ERROR: Usuario no eliminado'
+GO
+
+PRINT '=== PRUEBAS COMPLETADAS ==='
+
+
+-- Procedimiento almacenado para eliminar asignación de curso
+CREATE OR ALTER PROCEDURE sp_EliminarAsignacion
+    @id_asignacion INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @cantidadEstudiantes INT;
+    
+    -- Verificar si la asignación tiene estudiantes matriculados
+    SELECT @cantidadEstudiantes = COUNT(*)
+    FROM Matricula
+    WHERE id_asignacion = @id_asignacion;
+    
+    IF @cantidadEstudiantes > 0
+    BEGIN
+        RAISERROR('No se puede eliminar la asignación porque tiene estudiantes matriculados.', 16, 1);
+        RETURN;
+    END
+    
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        -- Eliminar asistencias del docente en esta asignación
+        DELETE FROM AsistenciaDocente WHERE id_asignacion = @id_asignacion;
+        
+        -- Eliminar la asignación
+        DELETE FROM AsignacionCurso WHERE id_asignacion = @id_asignacion;
+        
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
