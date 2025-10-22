@@ -85,8 +85,14 @@ namespace EducaEFRT.Controllers
 
             using (var db = new EduControlDB())
             {
-                var docentes = db.Docentes.ToList();
-                return View("~/Views/Admin/GestionDocente/Index.cshtml", docentes);
+                var docentes = db.Docentes.Select(d => new
+                {
+                    Docente = d,
+                    TieneAsignaciones = db.AsignacionesCurso.Any(a => a.IdDocente == d.IdDocente)
+                }).ToList();
+
+                ViewBag.DocentesConAsignaciones = docentes.Where(x => x.TieneAsignaciones).Select(x => x.Docente.IdDocente).ToList();
+                return View("~/Views/Admin/GestionDocente/Index.cshtml", docentes.Select(x => x.Docente).ToList());
             }
         }
 
@@ -219,7 +225,7 @@ namespace EducaEFRT.Controllers
                 if (docente == null)
                     return HttpNotFound();
 
-                // 2️⃣ Cargar solo las asignaciones de este docente
+                // 2️⃣ Cargar asignaciones con información de estudiantes
                 var asignacionesVm = db.AsignacionesCurso
                     .Include("Curso")
                     .Include("Seccion")
@@ -236,6 +242,13 @@ namespace EducaEFRT.Controllers
                     })
                     .ToList();
 
+                var idsAsignaciones = asignacionesVm.Select(av => av.IdAsignacion).ToList();
+                ViewBag.AsignacionesConEstudiantes = db.Matriculas
+                    .Where(m => idsAsignaciones.Contains(m.IdAsignacion))
+                    .Select(m => m.IdAsignacion)
+                    .Distinct()
+                    .ToList();
+
                 // 3️⃣ Crear ViewModel
                 var viewModel = new EditarDocenteViewModel
                 {
@@ -243,6 +256,7 @@ namespace EducaEFRT.Controllers
                     CursosAsignados = asignacionesVm
                 };
 
+                ViewBag.Secciones = db.Secciones.ToList();
                 return View("~/Views/Admin/GestionDocente/Editar.cshtml", viewModel);
             }
         }
@@ -300,7 +314,9 @@ namespace EducaEFRT.Controllers
             return RedirectToAction("GestionDocente");
         }
 
-        // GET: Eliminar docente
+        // POST: Eliminar docente
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult EliminarDocente(int id)
         {
             if (Session["IdUsuario"] == null)
@@ -308,37 +324,15 @@ namespace EducaEFRT.Controllers
 
             using (var db = new EduControlDB())
             {
-                var docente = db.Docentes.Find(id);
-                if (docente == null)
-                    return HttpNotFound();
-
-                return View("~/Views/Admin/GestionDocente/Eliminar.cshtml", docente);
-            }
-        }
-
-        // POST: Confirmar eliminación
-        [HttpPost, ActionName("EliminarDocente")]
-        [ValidateAntiForgeryToken]
-        public ActionResult EliminarDocenteConfirmado(int id)
-        {
-            if (Session["IdUsuario"] == null)
-                return RedirectToAction("Login", "Account");
-
-            using (var db = new EduControlDB())
-            {
-                var docente = db.Docentes.Find(id);
-                if (docente != null)
+                try
                 {
-                    var tieneCursosAsignados = db.AsignacionesCurso.Any(a => a.IdDocente == id);
-                    if (tieneCursosAsignados)
-                    {
-                        TempData["ErrorMessage"] = "No se puede eliminar el docente porque tiene cursos asignados.";
-                        return RedirectToAction("GestionDocente");
-                    }
-
-                    db.Docentes.Remove(docente);
-                    db.SaveChanges();
+                    db.Database.ExecuteSqlCommand("EXEC sp_EliminarDocente @id_docente", 
+                        new SqlParameter("@id_docente", id));
                     TempData["SuccessMessage"] = "Docente eliminado correctamente.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Error al eliminar: " + ex.Message;
                 }
             }
             return RedirectToAction("GestionDocente");
@@ -702,40 +696,27 @@ namespace EducaEFRT.Controllers
             }
         }
         
-        public ActionResult EliminarAsignacion(int id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EliminarAsignacion(int id, int idDocente)
         {
             if (Session["IdUsuario"] == null)
                 return RedirectToAction("Login", "Account");
 
             using (var db = new EduControlDB())
             {
-                var asignacion = db.AsignacionesCurso.Find(id);
-                if (asignacion != null)
+                try
                 {
-                    int idDocente = asignacion.IdDocente;
-                    
-                    // Verificar si hay estudiantes matriculados
-                    var tieneEstudiantes = db.Matriculas.Any(m => m.IdAsignacion == id);
-                    if (tieneEstudiantes)
-                    {
-                        TempData["ErrorMessage"] = "No se puede eliminar la asignación porque tiene estudiantes matriculados.";
-                        return RedirectToAction("EditarDocente", new { id = idDocente });
-                    }
-                    
-                    // Eliminar asistencias del docente
-                    var asistencias = db.AsistenciasDocente.Where(a => a.IdAsignacion == id).ToList();
-                    db.AsistenciasDocente.RemoveRange(asistencias);
-                    
-                    // Eliminar la asignación
-                    db.AsignacionesCurso.Remove(asignacion);
-                    db.SaveChanges();
-                    
+                    db.Database.ExecuteSqlCommand("EXEC sp_EliminarAsignacion @id_asignacion",
+                        new SqlParameter("@id_asignacion", id));
                     TempData["SuccessMessage"] = "Asignación eliminada correctamente.";
-                    return RedirectToAction("EditarDocente", new { id = idDocente });
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Error al eliminar: " + ex.Message;
                 }
             }
-            
-            return RedirectToAction("GestionDocente");
+            return RedirectToAction("EditarDocente", new { id = idDocente });
         }
 
         [HttpPost]
