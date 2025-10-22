@@ -214,7 +214,7 @@
 
         <div class="bg-blue-100 border text-center border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
             <strong>Mostrando @(Model?.Count() ?? 0) registros</strong>
-            
+
         </div>
 
         <!-- Table Results Section -->
@@ -345,36 +345,16 @@
         }
 
         function exportarPDF() {
-            const docente = document.getElementById('docente').value;
-            const curso = document.getElementById('curso').value;
-            const seccion = document.getElementById('seccion').value;
-            const turno = document.getElementById('turno').value;
-
+            const params = new URLSearchParams(window.location.search);
             let url = '@Url.Action("ExportarPDF", "Admin")';
-            let params = [];
-            if (docente) params.push('docente=' + encodeURIComponent(docente));
-            if (curso) params.push('curso=' + encodeURIComponent(curso));
-            if (seccion) params.push('seccion=' + encodeURIComponent(seccion));
-            if (turno) params.push('turno=' + encodeURIComponent(turno));
-
-            if (params.length > 0) url += '?' + params.join('&');
+            if (params.toString()) url += '?' + params.toString();
             window.location.href = url;
         }
 
         function exportarExcel() {
-            const docente = document.getElementById('docente').value;
-            const curso = document.getElementById('curso').value;
-            const seccion = document.getElementById('seccion').value;
-            const turno = document.getElementById('turno').value;
-
+            const params = new URLSearchParams(window.location.search);
             let url = '@Url.Action("ExportarExcel", "Admin")';
-            let params = [];
-            if (docente) params.push('docente=' + encodeURIComponent(docente));
-            if (curso) params.push('curso=' + encodeURIComponent(curso));
-            if (seccion) params.push('seccion=' + encodeURIComponent(seccion));
-            if (turno) params.push('turno=' + encodeURIComponent(turno));
-
-            if (params.length > 0) url += '?' + params.join('&');
+            if (params.toString()) url += '?' + params.toString();
             window.location.href = url;
         }
     </script>

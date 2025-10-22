@@ -13,7 +13,7 @@ using System.IO;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
-using OfficeOpenXml;
+using ClosedXML.Excel;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 
@@ -55,21 +55,21 @@ namespace EducaEFRT.Controllers
             using (var db = new EduControlDB())
             {
                 var cursos = (from c in db.Cursos
-                             join a in db.AsignacionesCurso on c.IdCurso equals a.IdCurso into asignaciones
-                             from asig in asignaciones.DefaultIfEmpty()
-                             select new CursoGestionViewModel
-                             {
-                                 IdCurso = c.IdCurso,
-                                 IdAsignacion = asig != null ? asig.IdAsignacion : 0,
-                                 NombreCurso = c.NombreCurso,
-                                 ImagenUrl = c.ImagenUrl,
-                                 NombreSeccion = asig != null ? asig.Seccion.NombreSeccion : "Sin asignar",
-                                 NombreTurno = asig != null ? asig.Turno.NombreTurno : "Sin asignar",
-                                 NombreDocente = asig != null ? asig.Docente.Nombres + " " + asig.Docente.Apellidos : "Sin asignar",
-                                 FechaInicio = asig != null ? asig.FechaInicio : DateTime.MinValue,
-                                 FechaFin = asig != null ? asig.FechaFin : DateTime.MinValue,
-                                 CantidadMatriculados = asig != null ? db.Matriculas.Count(m => m.IdAsignacion == asig.IdAsignacion) : 0
-                             })
+                              join a in db.AsignacionesCurso on c.IdCurso equals a.IdCurso into asignaciones
+                              from asig in asignaciones.DefaultIfEmpty()
+                              select new CursoGestionViewModel
+                              {
+                                  IdCurso = c.IdCurso,
+                                  IdAsignacion = asig != null ? asig.IdAsignacion : 0,
+                                  NombreCurso = c.NombreCurso,
+                                  ImagenUrl = c.ImagenUrl,
+                                  NombreSeccion = asig != null ? asig.Seccion.NombreSeccion : "Sin asignar",
+                                  NombreTurno = asig != null ? asig.Turno.NombreTurno : "Sin asignar",
+                                  NombreDocente = asig != null ? asig.Docente.Nombres + " " + asig.Docente.Apellidos : "Sin asignar",
+                                  FechaInicio = asig != null ? asig.FechaInicio : DateTime.MinValue,
+                                  FechaFin = asig != null ? asig.FechaFin : DateTime.MinValue,
+                                  CantidadMatriculados = asig != null ? db.Matriculas.Count(m => m.IdAsignacion == asig.IdAsignacion) : 0
+                              })
                              .ToList();
 
                 return View("~/Views/Admin/GestionCurso/IndexCurso.cshtml", cursos);
@@ -326,7 +326,7 @@ namespace EducaEFRT.Controllers
             {
                 try
                 {
-                    db.Database.ExecuteSqlCommand("EXEC sp_EliminarDocente @id_docente", 
+                    db.Database.ExecuteSqlCommand("EXEC sp_EliminarDocente @id_docente",
                         new SqlParameter("@id_docente", id));
                     TempData["SuccessMessage"] = "Docente eliminado correctamente.";
                 }
@@ -341,7 +341,7 @@ namespace EducaEFRT.Controllers
         // ===========================================================
         // MÉTODOS PARA GESTIÓN DE ASIGNACIONES
         // ===========================================================
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult EditarAsignacion(int IdAsignacion, int IdTurno, DateTime FechaInicio, DateTime FechaFin)
@@ -357,35 +357,35 @@ namespace EducaEFRT.Controllers
                     asignacion.IdTurno = IdTurno;
                     asignacion.FechaInicio = FechaInicio;
                     asignacion.FechaFin = FechaFin;
-                    
+
                     db.Entry(asignacion).State = EntityState.Modified;
                     db.SaveChanges();
-                    
+
                     TempData["SuccessMessage"] = "Asignación actualizada correctamente.";
                 }
             }
-            
+
             return RedirectToAction("EditarDocente", new { id = Request.Form["IdDocente"] });
         }
-        
+
         [HttpGet]
         public JsonResult ObtenerTurnos()
         {
             using (var db = new EduControlDB())
             {
-                var turnos = db.Turnos.Select(t => new { 
-                    IdTurno = t.IdTurno, 
-                    NombreTurno = t.NombreTurno 
+                var turnos = db.Turnos.Select(t => new {
+                    IdTurno = t.IdTurno,
+                    NombreTurno = t.NombreTurno
                 }).ToList();
-                
+
                 return Json(turnos, JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         // ===========================================================
         // CREAR NUEVO CURSO
         // ===========================================================
-        
+
         public ActionResult CrearCurso()
         {
             if (Session["IdUsuario"] == null)
@@ -642,15 +642,15 @@ namespace EducaEFRT.Controllers
         {
             using (var db = new EduControlDB())
             {
-                var cursos = db.Cursos.Select(c => new { 
-                    IdCurso = c.IdCurso, 
-                    NombreCurso = c.NombreCurso 
+                var cursos = db.Cursos.Select(c => new {
+                    IdCurso = c.IdCurso,
+                    NombreCurso = c.NombreCurso
                 }).ToList();
-                
+
                 return Json(cursos, JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AgregarAsignacion(FormCollection form)
@@ -678,13 +678,13 @@ namespace EducaEFRT.Controllers
                         FechaInicio = fechaInicio,
                         FechaFin = fechaFin
                     };
-                    
+
                     db.AsignacionesCurso.Add(asignacion);
                     db.SaveChanges();
-                    
+
                     System.Diagnostics.Debug.WriteLine($"Asignación creada: Docente {idDocente}, Curso {idCurso}");
                 }
-                
+
                 TempData["SuccessMessage"] = "Asignación agregada correctamente.";
                 return RedirectToAction("EditarDocente", new { id = idDocente });
             }
@@ -695,7 +695,7 @@ namespace EducaEFRT.Controllers
                 return RedirectToAction("GestionDocente");
             }
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult EliminarAsignacion(int id, int idDocente)
@@ -730,7 +730,7 @@ namespace EducaEFRT.Controllers
             {
                 try
                 {
-                    db.Database.ExecuteSqlCommand("EXEC sp_EliminarCursos @id_curso", 
+                    db.Database.ExecuteSqlCommand("EXEC sp_EliminarCursos @id_curso",
                         new SqlParameter("@id_curso", id));
                     TempData["SuccessMessage"] = "Curso eliminado correctamente.";
                 }
@@ -739,25 +739,25 @@ namespace EducaEFRT.Controllers
                     TempData["ErrorMessage"] = "Error al eliminar: " + ex.Message;
                 }
             }
-            
+
             using (var db = new EduControlDB())
             {
                 var cursos = (from c in db.Cursos
-                             join a in db.AsignacionesCurso on c.IdCurso equals a.IdCurso into asignaciones
-                             from asig in asignaciones.DefaultIfEmpty()
-                             select new CursoGestionViewModel
-                             {
-                                 IdCurso = c.IdCurso,
-                                 IdAsignacion = asig != null ? asig.IdAsignacion : 0,
-                                 NombreCurso = c.NombreCurso,
-                                 ImagenUrl = c.ImagenUrl,
-                                 NombreSeccion = asig != null ? asig.Seccion.NombreSeccion : "Sin asignar",
-                                 NombreTurno = asig != null ? asig.Turno.NombreTurno : "Sin asignar",
-                                 NombreDocente = asig != null ? asig.Docente.Nombres + " " + asig.Docente.Apellidos : "Sin asignar",
-                                 FechaInicio = asig != null ? asig.FechaInicio : DateTime.MinValue,
-                                 FechaFin = asig != null ? asig.FechaFin : DateTime.MinValue,
-                                 CantidadMatriculados = asig != null ? db.Matriculas.Count(m => m.IdAsignacion == asig.IdAsignacion) : 0
-                             })
+                              join a in db.AsignacionesCurso on c.IdCurso equals a.IdCurso into asignaciones
+                              from asig in asignaciones.DefaultIfEmpty()
+                              select new CursoGestionViewModel
+                              {
+                                  IdCurso = c.IdCurso,
+                                  IdAsignacion = asig != null ? asig.IdAsignacion : 0,
+                                  NombreCurso = c.NombreCurso,
+                                  ImagenUrl = c.ImagenUrl,
+                                  NombreSeccion = asig != null ? asig.Seccion.NombreSeccion : "Sin asignar",
+                                  NombreTurno = asig != null ? asig.Turno.NombreTurno : "Sin asignar",
+                                  NombreDocente = asig != null ? asig.Docente.Nombres + " " + asig.Docente.Apellidos : "Sin asignar",
+                                  FechaInicio = asig != null ? asig.FechaInicio : DateTime.MinValue,
+                                  FechaFin = asig != null ? asig.FechaFin : DateTime.MinValue,
+                                  CantidadMatriculados = asig != null ? db.Matriculas.Count(m => m.IdAsignacion == asig.IdAsignacion) : 0
+                              })
                              .ToList();
 
                 return View("~/Views/Admin/GestionCurso/IndexCurso.cshtml", cursos);
@@ -783,7 +783,7 @@ namespace EducaEFRT.Controllers
                 try
                 {
                     System.Diagnostics.Debug.WriteLine($"Ejecutando consulta con filtros: docente={docente}, curso={curso}, seccion={seccion}, turno={turno}");
-                    
+
                     var reportes = db.Database.SqlQuery<ReporteAsistenciaViewModel>(
                         "EXEC sp_ReporteAsistenciaDocente @id_docente, @id_curso, @id_seccion, @id_turno",
                         new SqlParameter("@id_docente", (object)docente ?? DBNull.Value),
@@ -791,9 +791,9 @@ namespace EducaEFRT.Controllers
                         new SqlParameter("@id_seccion", (object)seccion ?? DBNull.Value),
                         new SqlParameter("@id_turno", (object)turno ?? DBNull.Value)
                     ).ToList();
-                    
+
                     System.Diagnostics.Debug.WriteLine($"Registros obtenidos después del filtro: {reportes.Count}");
-                    
+
                     // Cargar datos para los selectores
                     ViewBag.Docentes = db.Docentes.Select(d => new SelectListItem
                     {
@@ -801,30 +801,30 @@ namespace EducaEFRT.Controllers
                         Text = d.Nombres + " " + d.Apellidos,
                         Selected = d.IdDocente == docente
                     }).ToList();
-                    
+
                     ViewBag.Cursos = db.Cursos.Select(c => new SelectListItem
                     {
                         Value = c.IdCurso.ToString(),
                         Text = c.NombreCurso,
                         Selected = c.IdCurso == curso
                     }).ToList();
-                    
+
                     ViewBag.Secciones = db.Secciones.Select(s => new SelectListItem
                     {
                         Value = s.IdSeccion.ToString(),
                         Text = s.NombreSeccion,
                         Selected = s.IdSeccion == seccion
                     }).ToList();
-                    
+
                     ViewBag.Turnos = db.Turnos.Select(t => new SelectListItem
                     {
                         Value = t.IdTurno.ToString(),
                         Text = t.NombreTurno,
                         Selected = t.IdTurno == turno
                     }).ToList();
-                    
+
                     System.Diagnostics.Debug.WriteLine($"Reportes encontrados: {reportes.Count}");
-                    
+
                     return View("~/Views/Admin/Reportes/Reportes.cshtml", reportes);
                 }
                 catch (Exception ex)
@@ -871,6 +871,8 @@ namespace EducaEFRT.Controllers
                 table.AddCell(new PdfPCell(new Phrase("Inasistencias", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
                 table.AddCell(new PdfPCell(new Phrase("Tardanzas", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, HorizontalAlignment = Element.ALIGN_CENTER });
 
+                int totalAsistencias = 0, totalInasistencias = 0, totalTardanzas = 0;
+
                 foreach (var item in reportes)
                 {
                     table.AddCell(new PdfPCell(new Phrase(item.Docente, normalFont)));
@@ -881,9 +883,20 @@ namespace EducaEFRT.Controllers
                     table.AddCell(new PdfPCell(new Phrase(item.Asistencias.ToString(), normalFont)) { HorizontalAlignment = Element.ALIGN_CENTER });
                     table.AddCell(new PdfPCell(new Phrase(item.Inasistencias.ToString(), normalFont)) { HorizontalAlignment = Element.ALIGN_CENTER });
                     table.AddCell(new PdfPCell(new Phrase(item.Tardanzas.ToString(), normalFont)) { HorizontalAlignment = Element.ALIGN_CENTER });
+
+                    totalAsistencias += item.Asistencias;
+                    totalInasistencias += item.Inasistencias;
+                    totalTardanzas += item.Tardanzas;
                 }
 
                 doc.Add(table);
+                doc.Add(new Paragraph(" ") { SpacingAfter = 20 });
+
+                var statsTable = new PdfPTable(3) { WidthPercentage = 60, HorizontalAlignment = Element.ALIGN_CENTER };
+                statsTable.AddCell(new PdfPCell(new Phrase("Asistencias: " + totalAsistencias, headerFont)) { BackgroundColor = new BaseColor(67, 97, 238), HorizontalAlignment = Element.ALIGN_CENTER, Padding = 10 });
+                statsTable.AddCell(new PdfPCell(new Phrase("Inasistencias: " + totalInasistencias, headerFont)) { BackgroundColor = new BaseColor(239, 68, 68), HorizontalAlignment = Element.ALIGN_CENTER, Padding = 10 });
+                statsTable.AddCell(new PdfPCell(new Phrase("Tardanzas: " + totalTardanzas, headerFont)) { BackgroundColor = new BaseColor(234, 179, 8), HorizontalAlignment = Element.ALIGN_CENTER, Padding = 10 });
+                doc.Add(statsTable);
                 doc.Close();
 
                 return File(stream.ToArray(), "application/pdf", "ReporteAsistencia.pdf");
@@ -902,44 +915,41 @@ namespace EducaEFRT.Controllers
                     new SqlParameter("@id_turno", (object)turno ?? DBNull.Value)
                 ).ToList();
 
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                using (var package = new ExcelPackage())
+                using (var workbook = new XLWorkbook())
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("Reporte Asistencia");
+                    var worksheet = workbook.Worksheets.Add("Reporte Asistencia");
 
-                    worksheet.Cells[1, 1].Value = "Docente";
-                    worksheet.Cells[1, 2].Value = "Curso";
-                    worksheet.Cells[1, 3].Value = "Sección";
-                    worksheet.Cells[1, 4].Value = "Turno";
-                    worksheet.Cells[1, 5].Value = "Total Clases";
-                    worksheet.Cells[1, 6].Value = "Asistencias";
-                    worksheet.Cells[1, 7].Value = "Inasistencias";
-                    worksheet.Cells[1, 8].Value = "Tardanzas";
+                    worksheet.Cell(1, 1).Value = "Docente";
+                    worksheet.Cell(1, 2).Value = "Curso";
+                    worksheet.Cell(1, 3).Value = "Sección";
+                    worksheet.Cell(1, 4).Value = "Turno";
+                    worksheet.Cell(1, 5).Value = "Total Clases";
+                    worksheet.Cell(1, 6).Value = "Asistencias";
+                    worksheet.Cell(1, 7).Value = "Inasistencias";
+                    worksheet.Cell(1, 8).Value = "Tardanzas";
 
-                    using (var range = worksheet.Cells[1, 1, 1, 8])
-                    {
-                        range.Style.Font.Bold = true;
-                        range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                        range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
-                    }
+                    worksheet.Range(1, 1, 1, 8).Style.Font.Bold = true;
+                    worksheet.Range(1, 1, 1, 8).Style.Fill.BackgroundColor = XLColor.LightGray;
 
                     int row = 2;
                     foreach (var item in reportes)
                     {
-                        worksheet.Cells[row, 1].Value = item.Docente;
-                        worksheet.Cells[row, 2].Value = item.Curso;
-                        worksheet.Cells[row, 3].Value = item.Seccion;
-                        worksheet.Cells[row, 4].Value = item.Turno;
-                        worksheet.Cells[row, 5].Value = item.TotalClases;
-                        worksheet.Cells[row, 6].Value = item.Asistencias;
-                        worksheet.Cells[row, 7].Value = item.Inasistencias;
-                        worksheet.Cells[row, 8].Value = item.Tardanzas;
+                        worksheet.Cell(row, 1).Value = item.Docente;
+                        worksheet.Cell(row, 2).Value = item.Curso;
+                        worksheet.Cell(row, 3).Value = item.Seccion;
+                        worksheet.Cell(row, 4).Value = item.Turno;
+                        worksheet.Cell(row, 5).Value = item.TotalClases;
+                        worksheet.Cell(row, 6).Value = item.Asistencias;
+                        worksheet.Cell(row, 7).Value = item.Inasistencias;
+                        worksheet.Cell(row, 8).Value = item.Tardanzas;
                         row++;
                     }
 
-                    worksheet.Cells.AutoFitColumns();
+                    worksheet.Columns().AdjustToContents();
 
-                    var stream = new MemoryStream(package.GetAsByteArray());
+                    var stream = new MemoryStream();
+                    workbook.SaveAs(stream);
+                    stream.Position = 0;
                     return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteAsistencia.xlsx");
                 }
             }

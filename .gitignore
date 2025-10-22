@@ -11,9 +11,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-.vs/
-bin/*
-obj/*
+
 # .NET / C#
 bin/
 obj/
